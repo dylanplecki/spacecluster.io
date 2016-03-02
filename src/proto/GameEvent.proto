@@ -1,0 +1,27 @@
+﻿import "Common.proto";
+package spacecluster.io;
+
+// Server-initiated message
+message GameEvent
+{
+	required uint64 Tick = 1;
+	required EventType Type = 2;
+	required uint32 InitObjId = 3; // Event initiator
+	required uint32 TargetObjId = 4; // Event target
+	oneof Payload
+	{
+		PlayerJoinedPayload PlayerJoined = 5;
+		PlayerJoinedPayload PlayerLeft = 6;
+		// TODO: Add different payloads based on event
+	}
+}
+
+message PlayerJoinedPayload
+{
+	// TODO
+}
+
+message PlayerLeftPayload
+{
+	// TODO
+}

@@ -1,0 +1,8 @@
+﻿package spacecluster.io;
+
+enum EventType
+{
+	PlayerJoin = 0;
+	PlayerLeave = 1;
+	// TODO: Add absorbed, killed, split, etc.
+}

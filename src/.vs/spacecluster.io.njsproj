@@ -18,7 +18,10 @@
   <ItemGroup>
     <Content Include="package.json" />
     <Compile Include="app.js" />
-    <Content Include="proto\BlobHeartbeat.proto" />
+    <Content Include="proto\GameEvent.proto" />
+    <Content Include="proto\GameHeartbeat.proto" />
+    <Content Include="proto\GameObjUpdate.proto" />
+    <Content Include="proto\Common.proto" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="api" />

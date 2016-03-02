@@ -1,6 +1,0 @@
-package spacecluster.io;
-
-message BlobHeartbeat
-{
-	// TODO
-}
