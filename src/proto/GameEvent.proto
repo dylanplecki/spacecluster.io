@@ -6,22 +6,42 @@ message GameEvent
 {
 	required uint64 Tick = 1;
 	required EventType Type = 2;
-	required uint32 InitObjId = 3; // Event initiator
-	required uint32 TargetObjId = 4; // Event target
+	required uint32 InitObjId = 3; // Event initiator, 0 = server
+	required uint32 TargetObjId = 4; // Event target, 0 = server
 	oneof Payload
 	{
 		PlayerJoinedPayload PlayerJoined = 5;
-		PlayerJoinedPayload PlayerLeft = 6;
-		// TODO: Add different payloads based on event
+		PlayerLeftPayload PlayerLeft = 6;
+		ObjectAbsorbedPayload ObjectAbsorbed = 7;
+		ObjectDestroyedPayload ObjectDestroyed = 8;
+		ObjectSplitPayload ObjectSplit = 9;
 	}
 }
 
 message PlayerJoinedPayload
 {
-	// TODO
+	required string Name = 1;
+	required string ObjTheme = 2;
+	required uint32 StartSize = 3;
 }
 
 message PlayerLeftPayload
 {
-	// TODO
+	optional string LeaveAnimation = 1;
+}
+
+message ObjectAbsorbedPayload
+{
+	required uint32 NewInitSize = 1;
+}
+
+message ObjectDestroyedPayload
+{
+	optional string DestroyReason = 1;
+}
+
+message ObjectSplitPayload
+{
+	required uint32 SplitDivision = 1;
+	required uint32 NewChildSize = 2;
 }

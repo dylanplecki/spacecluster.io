@@ -19,6 +19,6 @@
   "dependencies": {
     "express": "^4.13.4",
     "protocol-buffers": "^3.1.6",
-    "websocket": "^1.0.22"
+    "ws": "^1.0.1"
   }
 }

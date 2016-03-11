@@ -16,6 +16,7 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
   <ItemGroup>
+    <Compile Include="server\gameserver.js" />
     <Content Include="package.json" />
     <Compile Include="app.js" />
     <Content Include="proto\GameEvent.proto" />

@@ -4,5 +4,7 @@ enum EventType
 {
 	PlayerJoin = 0;
 	PlayerLeave = 1;
-	// TODO: Add absorbed, killed, split, etc.
+	ObjectAbsorbed = 2;
+	ObjectDestroyed = 3;
+	ObjectSplit = 4;
 }
