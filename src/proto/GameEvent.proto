@@ -1,4 +1,5 @@
 ﻿import "Common.proto";
+import "GameObject.proto";
 package spacecluster.io;
 
 // Server-initiated message
@@ -15,6 +16,7 @@ message GameEvent
 		ObjectAbsorbedPayload ObjectAbsorbed = 7;
 		ObjectDestroyedPayload ObjectDestroyed = 8;
 		ObjectSplitPayload ObjectSplit = 9;
+		CreateObjectPayload CreateObject = 10;
 	}
 }
 
@@ -22,7 +24,6 @@ message PlayerJoinedPayload
 {
 	required string Name = 1;
 	required string ObjTheme = 2;
-	required uint32 StartSize = 3;
 }
 
 message PlayerLeftPayload
@@ -42,6 +43,12 @@ message ObjectDestroyedPayload
 
 message ObjectSplitPayload
 {
-	required uint32 SplitDivision = 1;
-	required uint32 NewChildSize = 2;
+	repeated CreateObjectPayload CreatedObjects = 1;
+}
+
+message CreateObjectPayload
+{
+	required uint32 ObjId = 1;
+	required string ObjType = 2;
+	required GameObjState InitialState = 3;
 }

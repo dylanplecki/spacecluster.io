@@ -1,0 +1,10 @@
+﻿{
+  "game_engine": {
+    "tick_rate": 30, // Hertz
+    "frame_lookback_length": 10, // Frames
+    "player_kick_time": 3 // Seconds
+  },
+  "server": {
+    "port": 8080
+  }
+}

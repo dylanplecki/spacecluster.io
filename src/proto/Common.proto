@@ -7,4 +7,5 @@ enum EventType
 	ObjectAbsorbed = 2;
 	ObjectDestroyed = 3;
 	ObjectSplit = 4;
+	CreateObject = 5;
 }
