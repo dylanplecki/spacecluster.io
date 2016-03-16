@@ -8,14 +8,14 @@ var gameserver = require("./server/gameserver");
  * Initialize Gameserver
  */
 
-wss = new WebSocketServer({ server: http });
+var wss = new WebSocketServer({ server: http });
 gameserver.initialize(wss, config);
 
 /**
  * HTTP Server Code
  */
 
-var port = config.get("server.port");;
+var port = config.get("server.port");
 
 app.get("/", function(req, res) {
     res.sendfile("client/index.html");

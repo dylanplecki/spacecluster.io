@@ -168,7 +168,8 @@ var protobuf = require("protobufjs");
      */
     module.exports.initialize = function(wss, config) {
         if (engine.initialized) {
-            console.log("WARNING: Attempted to initialize the same instance of gameserver {" + engine.id + "} twice!");
+            console.log("WARNING: Attempted to initialize the same instance " +
+                        "of gameserver {" + engine.id + "} twice!");
             return false;
         }
 
@@ -184,8 +185,10 @@ var protobuf = require("protobufjs");
         engine.serverName = config.get("game_engine.server_name");
         engine.serverRegion = config.get("game_engine.server_region");
         engine.maxPlayers = config.get("game_engine.max_players");
-        engine.frameLookbackLength = config.get("game_engine.frame_lookback_length");
-        engine.playerKickTimeout = config.get("game_engine.player_kick_timeout");
+        engine.frameLookbackLength =
+            config.get("game_engine.frame_lookback_length");
+        engine.playerKickTimeout =
+            config.get("game_engine.player_kick_timeout");
 
         // Final engine config initialization
         engine.frameTime = (1 / engine.tickRate) * 1000;
@@ -218,7 +221,8 @@ var protobuf = require("protobufjs");
      */
     module.exports.shutdown = function() {
         if (!engine.initialized) {
-            console.log("WARNING: Attempted to shutdown an uninitialized instance of a gameserver!");
+            console.log("WARNING: Attempted to shutdown an uninitialized " +
+                        "instance of a gameserver!");
             return false;
         }
 
