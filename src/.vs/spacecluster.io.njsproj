@@ -24,6 +24,7 @@
     <Content Include="proto\GameHeartbeat.proto" />
     <Content Include="proto\GameObject.proto" />
     <Content Include="proto\Common.proto" />
+    <Content Include="proto\ServerInfo.proto" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="api" />

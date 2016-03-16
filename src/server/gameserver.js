@@ -1,21 +1,47 @@
-﻿var uuid = require("node-uuid"); // TODO: Change from UUID
+﻿var uuid = require("node-uuid");
+var protobuf = require("protobufjs");
 
 (function() {
+    
+    /*-------------------*/
+    /* Utility Functions */
+    /*-------------------*/
+    
+    function UidGenerator() {
+        this.counter = 0;
+        this.maxId = 4294967295;
+        this.new = function() {
+            return (this.counter++ % this.maxId) + 1;
+        }
+    }
+    var uidGenerator = new UidGenerator();
+    
+    /*------------------*/
+    /* Protobuf Loaders */
+    /*------------------*/
+    
+    var protobuilder = protobuf.newBuilder();
+    protobuf.loadProtoFile("proto/Common.proto", protobuilder);
+    protobuf.loadProtoFile("proto/GameEvent.proto", protobuilder);
+    protobuf.loadProtoFile("proto/GameHeartbeat.proto", protobuilder);
+    protobuf.loadProtoFile("proto/GameObject.proto", protobuilder);
+    protobuf.loadProtoFile("proto/ServerInfo.proto", protobuilder);
+    var protoroot = protobuilder.build();
 
     /*-----------------------*/
     /* Game Data Descriptors */
     /*-----------------------*/
 
-    function player(name, theme, ip) {
-        this.id = uuid.v4();
+    function Player(name, theme, ip) {
+        this.id = uidGenerator.new();
         this.name = name;
         this.theme = theme;
         this.ipAddress = ip;
     }
 
-    function gameobject(id, type, x, y, z, vel, azi, size) {
+    function GameObject(id, type, x, y, z, vel, azi, size) {
         if (id === null) {
-            id = uuid.v4();
+            id = uidGenerator.new();
         }
         this.id = id;
         this.type = type;
@@ -36,18 +62,40 @@
     
     engine.tick = 0;
     engine.frames = [];
-    engine.players = [];
-    engine.wss = null; // Web Socket Server
-    engine.tickRate = 0;
-    engine.frameTime = 0;
+    engine.players = {};
+    engine.playerCount = 0;
     
+    /**
+     * Function: engine.addEventToFrame
+     * Arguments:
+     *      1. event: GameEvent to add to frame
+     */
+    engine.addEventToFrame = function (event) {
+        // TODO
+    };
+
     /**
      * Function: engine.addNewPlayer
      * Arguments:
-     *      1. newPlayer: impl of 'player' proto
+     *      1. newPlayer: impl of 'Player' obj
      */
     engine.addNewPlayer = function (newPlayer) {
-        // TODO
+        engine.players[newPlayer.id] = newPlayer;
+        ++engine.playerCount;
+
+        // Broadcast player join to network
+        var playerJoinPayload = new protoroot.PlayerJoinedPayload({
+            "Name": newPlayer.name,
+            "ObjTheme": newPlayer.theme
+        });
+        var playerJoin = new protoroot.GameEvent({
+            "Tick": engine.tick,
+            "Type": engine.tick,
+            "InitObjId": engine.tick,
+            "TargetObjId": engine.tick,
+            "PlayerJoined": playerJoinPayload
+        });
+        engine.addEventToFrame(playerJoin);
     };
 
     /**
@@ -65,8 +113,20 @@
      *      1. socket: WS connection socket
      * Returns: Nothing
      */
-    engine.onClientConnect = function(wss) {
-        // TODO
+    engine.onClientConnect = function (ws) {
+        // Send server info
+        var serverInfo = new protoroot.ServerInfo({
+            "ServerId": engine.id,
+            "ServerName": engine.serverName,
+            "ServerRegion": engine.serverRegion,
+            "MaxPlayers": engine.maxPlayers,
+            "PlayerCount": engine.playerCount,
+            "TickRate": engine.tickRate,
+            "FrameLookbackLength": engine.frameLookbackLength,
+            "PlayerKickTimeout": engine.playerKickTimeout
+        });
+        var byteBuffer = serverInfo.encode();
+        ws.send(byteBuffer.toBuffer(), { binary: true, mask: true });
     };
 
     /**
@@ -121,6 +181,11 @@
 
         // Get engine config options
         engine.tickRate = config.get("game_engine.tick_rate");
+        engine.serverName = config.get("game_engine.server_name");
+        engine.serverRegion = config.get("game_engine.server_region");
+        engine.maxPlayers = config.get("game_engine.max_players");
+        engine.frameLookbackLength = config.get("game_engine.frame_lookback_length");
+        engine.playerKickTimeout = config.get("game_engine.player_kick_timeout");
 
         // Final engine config initialization
         engine.frameTime = (1 / engine.tickRate) * 1000;
@@ -132,6 +197,11 @@
             ws.on("message", gameserver.onClientMessage);
             ws.on("error", gameserver.handleSocketError);
         });
+        wss.broadcast = function(data, flags) {
+            wss.clients.forEach(function(client) {
+                client.send(data, flags);
+            });
+        };
 
         // Initialize tick broadcast mechanism
         engine.tickTimer = setInterval(engine.onServerTick, engine.frameTime);

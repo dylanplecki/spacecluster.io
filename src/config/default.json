@@ -1,8 +1,11 @@
 ﻿{
   "game_engine": {
+    "server_name": "test-1",
+    "server_region": "us-northeast-do-1",
+    "max_players": 1000,
     "tick_rate": 30, // Hertz
     "frame_lookback_length": 10, // Frames
-    "player_kick_time": 3 // Seconds
+    "player_kick_timeout": 3 // Seconds
   },
   "server": {
     "port": 8080
