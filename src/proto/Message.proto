@@ -1,0 +1,17 @@
+import "Common.proto";
+import "GameEvent.proto";
+import "GameHeartbeat.proto";
+import "GameObject.proto";
+import "ServerInfo.proto";
+package spacecluster.io;
+
+message Message
+{
+    oneof Payload
+    {
+        GameEvent GameEvent = 1;
+        GameHeartbeat GameHeartbeat = 2;
+        GameObjUpdate GameObjUpdate = 3;
+        ServerInfo ServerInfo = 4;
+    }
+}

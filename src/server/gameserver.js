@@ -25,6 +25,7 @@ var protobuf = require("protobufjs");
     protobuf.loadProtoFile("proto/GameEvent.proto", protobuilder);
     protobuf.loadProtoFile("proto/GameHeartbeat.proto", protobuilder);
     protobuf.loadProtoFile("proto/GameObject.proto", protobuilder);
+    protobuf.loadProtoFile("proto/Message.proto", protobuilder);
     protobuf.loadProtoFile("proto/ServerInfo.proto", protobuilder);
     var protoroot = protobuilder.build();
 
@@ -125,7 +126,10 @@ var protobuf = require("protobufjs");
             "FrameLookbackLength": engine.frameLookbackLength,
             "PlayerKickTimeout": engine.playerKickTimeout
         });
-        var byteBuffer = serverInfo.encode();
+        var message = new protoroot.Message({
+            "ServerInfo": serverInfo
+        });
+        var byteBuffer = message.encode();
         ws.send(byteBuffer.toBuffer(), { binary: true, mask: true });
     };
 

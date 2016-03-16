@@ -6,7 +6,6 @@ package spacecluster.io;
 // Server-initiated message
 message GameHeartbeat
 {
-	required uint64 SyncTick = 1;
 	repeated GameEvent Events = 2;
 	repeated GameObjUpdate Updates = 3;
 }
