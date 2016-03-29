@@ -53,6 +53,18 @@ var protobuf = require("protobufjs");
         this.azimuth = azi;
         this.size = size;
     }
+    
+    function GameFrame(tick) {
+        this.tick = tick;
+        this.events = [];
+        this.updates = [];
+        this.addEvent = function(event) {
+            
+        }
+        this.addUpdate = function(update) {
+            
+        }
+    }
 
     /*----------------------------*/
     /* Game Engine Implementation */
@@ -64,14 +76,24 @@ var protobuf = require("protobufjs");
     engine.tick = 0;
     engine.frames = [];
     engine.players = {};
+    engine.objects = {};
     engine.playerCount = 0;
+    
+    /**
+     * Function: engine.simulateFrame
+     * Arguments:
+     *      1. frame: GameFrame impl to simulate
+     */
+    engine.simulateFrame = function(frame) {
+        // TODO
+    };
     
     /**
      * Function: engine.addEventToFrame
      * Arguments:
      *      1. event: GameEvent to add to frame
      */
-    engine.addEventToFrame = function (event) {
+    engine.addEventToFrame = function(event) {
         // TODO
     };
 
@@ -80,7 +102,7 @@ var protobuf = require("protobufjs");
      * Arguments:
      *      1. newPlayer: impl of 'Player' obj
      */
-    engine.addNewPlayer = function (newPlayer) {
+    engine.addNewPlayer = function(newPlayer) {
         engine.players[newPlayer.id] = newPlayer;
         ++engine.playerCount;
 
@@ -98,13 +120,23 @@ var protobuf = require("protobufjs");
         });
         engine.addEventToFrame(playerJoin);
     };
+    
+    /**
+     * Function: engine.removePlayer
+     * Arguments:
+     *      1. player: impl of 'Player' obj to be removed
+     */
+    engine.removePlayer = function(player) {
+        // TODO
+    };
 
     /**
      * Function: engine.onServerTick
      * Arguments: None
      */
     engine.onServerTick = function() {
-        // TODO
+        var frame = engine.frames[engine.tick % engine.frameLookbackLength];
+        engine.simulateFrame();
         ++engine.tick;
     };
 
@@ -182,7 +214,6 @@ var protobuf = require("protobufjs");
         // Initialize game engine space
         engine.id = uuid.v4();
         engine.wss = wss;
-        engine.tick = 1;
 
         // Get engine config options
         engine.tickRate = config.get("game_engine.tick_rate");
