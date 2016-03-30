@@ -1,33 +1,37 @@
-﻿var uuid = require("node-uuid");
-var protobuf = require("protobufjs");
+﻿var uuid = require('node-uuid');
+var protobuf = require('protobufjs');
 
-(function() {
-    
+(function module() {
+    var uidGenerator;
+    var protobuilder;
+    var protoroot;
+    var engine;
+
     /*-------------------*/
     /* Utility Functions */
     /*-------------------*/
-    
+
     function UidGenerator() {
         this.counter = 0;
         this.maxId = 4294967295;
-        this.new = function() {
+        this.new = function generator() {
             return (this.counter++ % this.maxId) + 1;
-        }
+        };
     }
-    var uidGenerator = new UidGenerator();
-    
+    uidGenerator = new UidGenerator();
+
     /*------------------*/
     /* Protobuf Loaders */
     /*------------------*/
-    
-    var protobuilder = protobuf.newBuilder();
-    protobuf.loadProtoFile("proto/Common.proto", protobuilder);
-    protobuf.loadProtoFile("proto/GameEvent.proto", protobuilder);
-    protobuf.loadProtoFile("proto/GameHeartbeat.proto", protobuilder);
-    protobuf.loadProtoFile("proto/GameObject.proto", protobuilder);
-    protobuf.loadProtoFile("proto/Message.proto", protobuilder);
-    protobuf.loadProtoFile("proto/ServerInfo.proto", protobuilder);
-    var protoroot = protobuilder.build();
+
+    protobuilder = protobuf.newBuilder();
+    protobuf.loadProtoFile('proto/Common.proto', protobuilder);
+    protobuf.loadProtoFile('proto/GameEvent.proto', protobuilder);
+    protobuf.loadProtoFile('proto/GameHeartbeat.proto', protobuilder);
+    protobuf.loadProtoFile('proto/GameObject.proto', protobuilder);
+    protobuf.loadProtoFile('proto/Message.proto', protobuilder);
+    protobuf.loadProtoFile('proto/ServerInfo.proto', protobuilder);
+    protoroot = protobuilder.build();
 
     /*-----------------------*/
     /* Game Data Descriptors */
@@ -42,9 +46,10 @@ var protobuf = require("protobufjs");
 
     function GameObject(id, type, x, y, z, vel, azi, size) {
         if (id === null) {
-            id = uidGenerator.new();
+            this.id = uidGenerator.new();
+        } else {
+            this.id = id;
         }
-        this.id = id;
         this.type = type;
         this.xPos = x;
         this.yPos = y;
@@ -53,47 +58,47 @@ var protobuf = require("protobufjs");
         this.azimuth = azi;
         this.size = size;
     }
-    
+
     function GameFrame(tick) {
         this.tick = tick;
         this.events = [];
         this.updates = [];
-        this.addEvent = function(event) {
-            
-        }
-        this.addUpdate = function(update) {
-            
-        }
+        this.addEvent = function addEvent(event) {
+            // TODO
+        };
+        this.addUpdate = function addUpdate(update) {
+            // TODO
+        };
     }
 
     /*----------------------------*/
     /* Game Engine Implementation */
     /*----------------------------*/
 
-    var engine = {};
+    engine = {};
     engine.initialized = false;
-    
+
     engine.tick = 0;
     engine.frames = [];
     engine.players = {};
     engine.objects = {};
     engine.playerCount = 0;
-    
+
     /**
      * Function: engine.simulateFrame
      * Arguments:
      *      1. frame: GameFrame impl to simulate
      */
-    engine.simulateFrame = function(frame) {
+    engine.simulateFrame = function simulateFrame(frame) {
         // TODO
     };
-    
+
     /**
      * Function: engine.addEventToFrame
      * Arguments:
      *      1. event: GameEvent to add to frame
      */
-    engine.addEventToFrame = function(event) {
+    engine.addEventToFrame = function addEventToFrame(event) {
         // TODO
     };
 
@@ -102,31 +107,34 @@ var protobuf = require("protobufjs");
      * Arguments:
      *      1. newPlayer: impl of 'Player' obj
      */
-    engine.addNewPlayer = function(newPlayer) {
+    engine.addNewPlayer = function addNewPlayer(newPlayer) {
+        var playerJoinPayload;
+        var playerJoin;
+
         engine.players[newPlayer.id] = newPlayer;
         ++engine.playerCount;
 
         // Broadcast player join to network
-        var playerJoinPayload = new protoroot.PlayerJoinedPayload({
-            "Name": newPlayer.name,
-            "ObjTheme": newPlayer.theme
+        playerJoinPayload = new protoroot.PlayerJoinedPayload({
+            Name: newPlayer.name,
+            ObjTheme: newPlayer.theme
         });
-        var playerJoin = new protoroot.GameEvent({
-            "Tick": engine.tick,
-            "Type": engine.tick,
-            "InitObjId": engine.tick,
-            "TargetObjId": engine.tick,
-            "PlayerJoined": playerJoinPayload
+        playerJoin = new protoroot.GameEvent({
+            Tick: engine.tick,
+            Type: engine.tick,
+            InitObjId: engine.tick,
+            TargetObjId: engine.tick,
+            PlayerJoined: playerJoinPayload
         });
         engine.addEventToFrame(playerJoin);
     };
-    
+
     /**
      * Function: engine.removePlayer
      * Arguments:
      *      1. player: impl of 'Player' obj to be removed
      */
-    engine.removePlayer = function(player) {
+    engine.removePlayer = function removePlayer(player) {
         // TODO
     };
 
@@ -134,7 +142,7 @@ var protobuf = require("protobufjs");
      * Function: engine.onServerTick
      * Arguments: None
      */
-    engine.onServerTick = function() {
+    engine.onServerTick = function onServerTick() {
         var frame = engine.frames[engine.tick % engine.frameLookbackLength];
         engine.simulateFrame();
         ++engine.tick;
@@ -146,20 +154,20 @@ var protobuf = require("protobufjs");
      *      1. socket: WS connection socket
      * Returns: Nothing
      */
-    engine.onClientConnect = function (ws) {
+    engine.onClientConnect = function onClientConnect(ws) {
         // Send server info
         var serverInfo = new protoroot.ServerInfo({
-            "ServerId": engine.id,
-            "ServerName": engine.serverName,
-            "ServerRegion": engine.serverRegion,
-            "MaxPlayers": engine.maxPlayers,
-            "PlayerCount": engine.playerCount,
-            "TickRate": engine.tickRate,
-            "FrameLookbackLength": engine.frameLookbackLength,
-            "PlayerKickTimeout": engine.playerKickTimeout
+            ServerId: engine.id,
+            ServerName: engine.serverName,
+            ServerRegion: engine.serverRegion,
+            MaxPlayers: engine.maxPlayers,
+            PlayerCount: engine.playerCount,
+            TickRate: engine.tickRate,
+            FrameLookbackLength: engine.frameLookbackLength,
+            PlayerKickTimeout: engine.playerKickTimeout
         });
         var message = new protoroot.Message({
-            "ServerInfo": serverInfo
+            ServerInfo: serverInfo
         });
         var byteBuffer = message.encode();
         ws.send(byteBuffer.toBuffer(), { binary: true, mask: true });
@@ -171,7 +179,7 @@ var protobuf = require("protobufjs");
      *      1. data: client data packet
      * Returns: Nothing
      */
-    engine.onClientMessage = function(data, flags) {
+    engine.onClientMessage = function onClientMessage(data, flags) {
         // TODO
     };
 
@@ -182,7 +190,7 @@ var protobuf = require("protobufjs");
      *      2. message: client data packet
      * Returns: Nothing
      */
-    engine.onClientDisconnect = function(code, message) {
+    engine.onClientDisconnect = function onClientDisconnect(code, message) {
         // TODO
     };
 
@@ -192,7 +200,7 @@ var protobuf = require("protobufjs");
      *      1. error: client error
      * Returns: Nothing
      */
-    engine.handleSocketError = function(error) {
+    engine.handleSocketError = function handleSocketError(error) {
         // TODO
     };
 
@@ -202,41 +210,41 @@ var protobuf = require("protobufjs");
      *      1. wss: WS web socket server
      * Returns: Success status
      */
-    module.exports.initialize = function(wss, config) {
+    module.exports.initialize = function initialize(wss, config) {
         if (engine.initialized) {
-            console.log("WARNING: Attempted to initialize the same instance " +
-                        "of gameserver {" + engine.id + "} twice!");
+            console.log('WARNING: Attempted to initialize the same instance ' +
+                        'of gameserver {' + engine.id + '} twice!');
             return false;
         }
 
-        console.log("Gameserver Initializing...");
+        console.log('Gameserver Initializing...');
 
         // Initialize game engine space
         engine.id = uuid.v4();
         engine.wss = wss;
 
         // Get engine config options
-        engine.tickRate = config.get("game_engine.tick_rate");
-        engine.serverName = config.get("game_engine.server_name");
-        engine.serverRegion = config.get("game_engine.server_region");
-        engine.maxPlayers = config.get("game_engine.max_players");
+        engine.tickRate = config.get('game_engine.tick_rate');
+        engine.serverName = config.get('game_engine.server_name');
+        engine.serverRegion = config.get('game_engine.server_region');
+        engine.maxPlayers = config.get('game_engine.max_players');
         engine.frameLookbackLength =
-            config.get("game_engine.frame_lookback_length");
+            config.get('game_engine.frame_lookback_length');
         engine.playerKickTimeout =
-            config.get("game_engine.player_kick_timeout");
+            config.get('game_engine.player_kick_timeout');
 
         // Final engine config initialization
         engine.frameTime = (1 / engine.tickRate) * 1000;
 
         // Initialize socket connection
-        engine.wss.on("connection", function(ws) {
-            gameserver.onClientConnect(ws);
-            ws.on("close", gameserver.onClientDisconnect);
-            ws.on("message", gameserver.onClientMessage);
-            ws.on("error", gameserver.handleSocketError);
+        engine.wss.on('connection', function onConnection(ws) {
+            engine.onClientConnect(ws);
+            ws.on('close', engine.onClientDisconnect);
+            ws.on('message', engine.onClientMessage);
+            ws.on('error', engine.handleSocketError);
         });
-        wss.broadcast = function(data, flags) {
-            wss.clients.forEach(function(client) {
+        wss.broadcast = function broadcast(data, flags) {
+            wss.clients.forEach(function forEach(client) {
                 client.send(data, flags);
             });
         };
@@ -245,7 +253,7 @@ var protobuf = require("protobufjs");
         engine.tickTimer = setInterval(engine.onServerTick, engine.frameTime);
 
         engine.initialized = true;
-        console.log("Game Server {" + engine.id + "} Initialized");
+        console.log('Game Server {' + engine.id + '} Initialized');
         return true;
     };
 
@@ -254,19 +262,21 @@ var protobuf = require("protobufjs");
      * Arguments: None
      * Returns: Success status
      */
-    module.exports.shutdown = function() {
+    module.exports.shutdown = function shutdown() {
+        var engineId;
+
         if (!engine.initialized) {
-            console.log("WARNING: Attempted to shutdown an uninitialized " +
-                        "instance of a gameserver!");
+            console.log('WARNING: Attempted to shutdown an uninitialized ' +
+                        'instance of a gameserver!');
             return false;
         }
 
-        var engineId = engine.id;
-        console.log("Gameserver {" + engineId + "} Shutting Down...");
+        engineId = engine.id;
+        console.log('Gameserver {' + engineId + '} Shutting Down...');
 
         // TODO: Gracefully shutdown
-        
-        console.log("Gameserver {" + engineId + "} Shut Down");
+
+        console.log('Gameserver {' + engineId + '} Shut Down');
         return true;
-    }
+    };
 }());
