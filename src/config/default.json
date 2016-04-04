@@ -3,9 +3,9 @@
     "server_name": "test-1",
     "server_region": "us-northeast-do-1",
     "max_players": 1000,
-    "tick_rate": 30, // Hertz
-    "frame_lookback_length": 10, // Frames
-    "player_kick_timeout": 3 // Seconds
+    "tick_rate": 30,
+    "frame_lookback_length": 30,
+    "player_kick_timeout": 3
   },
   "server": {
     "port": 8080

@@ -5,9 +5,8 @@ package spacecluster.io;
 // Server-initiated message
 message GameEvent
 {
-	required EventType Type = 2;
-	required uint32 InitObjId = 3; // Event initiator, 0 = server
-	required uint32 TargetObjId = 4; // Event target, 0 = server
+	required string InitObjId = 3; // Event initiator, 0 = server
+	required string TargetObjId = 4; // Event target, 0 = server
 	oneof Payload
 	{
 		PlayerJoinedPayload PlayerJoined = 5;
@@ -21,33 +20,44 @@ message GameEvent
 
 message PlayerJoinedPayload
 {
+	// InitObjId = ???
+	// TargetObjId = Joined Player
 	required string Name = 1;
 	required string ObjTheme = 2;
 }
 
 message PlayerLeftPayload
 {
+	// InitObjId = ???
+	// TargetObjId = Leaving Player
 	optional string LeaveAnimation = 1;
 }
 
 message ObjectAbsorbedPayload
 {
+	// InitObjId = Absorber (or server, equiv. to destroy)
+	// TargetObjId = Absorbed
 	required uint32 NewInitSize = 1;
 }
 
 message ObjectDestroyedPayload
 {
+	// InitObjId = Destroyer (or server)
+	// TargetObjId = Destroyed
 	optional string DestroyReason = 1;
 }
 
 message ObjectSplitPayload
 {
+	// InitObjId = Splitting Initiator (or server)
+	// TargetObjId = Split Object
 	repeated CreateObjectPayload CreatedObjects = 1;
 }
 
 message CreateObjectPayload
 {
-	required uint32 ObjId = 1;
+	// InitObjId = Parent Object (or server)
+	// TargetObjId = New Object
 	required string ObjType = 2;
 	required GameObjState InitialState = 3;
 }

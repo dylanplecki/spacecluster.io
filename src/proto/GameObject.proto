@@ -12,6 +12,6 @@ message GameObjState
 
 message GameObjUpdate
 {
-	required uint32 ObjId = 2;
+	required string ObjId = 2;
 	required GameObjState ObjState = 3;
 }

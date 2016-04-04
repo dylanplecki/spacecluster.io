@@ -1,9 +1,8 @@
 {
-    "extends": "airbnb/legacy",
-    "plugins": [
-        "react"
-    ],
-    "rules": {
-        "indent": [2, 4, { "SwitchCase": 2, "VariableDeclarator": 2 }]
-    }
+  "env": {
+    "node": true
+  },
+  "rules": {
+    "quotes": [2, "single"]
+  }
 }

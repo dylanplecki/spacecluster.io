@@ -7,11 +7,12 @@ package spacecluster.io;
 
 message Message
 {
+    required uint64 Tick = 1;
     oneof Payload
     {
-        GameEvent GameEvent = 1;
-        GameHeartbeat GameHeartbeat = 2;
-        GameObjUpdate GameObjUpdate = 3;
-        ServerInfo ServerInfo = 4;
+        GameEvent GameEvent = 2;
+        GameHeartbeat GameHeartbeat = 3;
+        GameObjUpdate GameObjUpdate = 4;
+        ServerInfo ServerInfo = 5;
     }
 }
