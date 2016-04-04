@@ -1,0 +1,19 @@
+{
+  "ecmaVersion": 5,
+  "libs": [],
+  "loadEagerly": [
+    "server/*.js",
+    "app.js"
+  ],
+  "dontLoad": [
+    "node_modules"
+  ],
+  "plugins": {
+    "complete_strings": {},
+    "node": {},
+    "lint": {},
+    "doc_comment": {
+      "fullDocs": true
+    }
+  }
+}
