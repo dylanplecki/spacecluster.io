@@ -9,4 +9,8 @@ message ServerInfo
 	required uint32 TickRate = 6; // Hertz
 	required uint32 FrameLookbackLength = 7; // Frames
 	required uint32 PlayerKickTimeout = 8; // Seconds
+	required uint64 LatCoordinate = 9;
+	required uint64 LongCoordinate = 10;
+	required uint64 LatSize = 11;
+	required uint64 LongSize = 12;
 }

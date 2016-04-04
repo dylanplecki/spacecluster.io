@@ -90,6 +90,7 @@ engine.frames = [];
 engine.players = {};
 engine.objects = {};
 engine.playerCount = 0;
+engine.location = {};
 
 /**
  * Function: engine.getFrame
@@ -193,6 +194,7 @@ engine.onServerTick = function() {
  *      1. newPlayer: impl of 'Player' obj
  */
 engine.addNewPlayer = function(player) {
+    // TODO: Check for max players
     engine.players[player.id] = player;
     ++engine.playerCount;
 };
@@ -226,7 +228,11 @@ engine.onClientConnect = function(ws) {
         PlayerCount: engine.playerCount,
         TickRate: engine.tickRate,
         FrameLookbackLength: engine.frameLookbackLength,
-        PlayerKickTimeout: engine.playerKickTimeout
+        PlayerKickTimeout: engine.playerKickTimeout,
+        LatCoordinate: engine.location.latitude,
+        LongCoordinate: engine.location.longitude,
+        LatSize: engine.location.lat_length,
+        LongSize: engine.location.long_length,
     });
 
     // Encapsulate in message
@@ -327,13 +333,18 @@ exports.initialize = function(wss, config) {
 
     // Get engine config options
     engine.tickRate = config.get('game_engine.tick_rate');
-    engine.serverName = config.get('game_engine.server_name');
-    engine.serverRegion = config.get('game_engine.server_region');
+    engine.serverName = config.get('server.name');
+    engine.serverRegion = config.get('server.region');
     engine.maxPlayers = config.get('game_engine.max_players');
     engine.frameLookbackLength =
         config.get('game_engine.frame_lookback_length');
     engine.playerKickTimeout =
         config.get('game_engine.player_kick_timeout');
+    engine.location.latitude = config.get('game_engine.location.latitude');
+    engine.location.longitude = config.get('game_engine.location.longitude');
+    engine.location.lat_length = config.get('game_engine.location.lat_length');
+    engine.location.long_length =
+        config.get('game_engine.location.long_length');
 
     // Final engine config initialization
     engine.frameTime = (1 / engine.tickRate) * 1000;
