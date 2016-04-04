@@ -1,9 +1,7 @@
-import "Common.proto";
 import "GameEvent.proto";
 import "GameHeartbeat.proto";
 import "GameObject.proto";
 import "ServerInfo.proto";
-package spacecluster.io;
 
 message Message
 {

@@ -1,5 +1,3 @@
-import "Common.proto";
-package spacecluster.io;
 
 message GameObjState
 {

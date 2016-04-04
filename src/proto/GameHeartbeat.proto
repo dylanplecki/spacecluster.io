@@ -1,7 +1,5 @@
-﻿import "Common.proto";
-import "GameObject.proto";
+﻿import "GameObject.proto";
 import "GameEvent.proto";
-package spacecluster.io;
 
 // Server-initiated message
 message GameHeartbeat

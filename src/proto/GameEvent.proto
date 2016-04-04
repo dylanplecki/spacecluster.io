@@ -1,6 +1,4 @@
-﻿import "Common.proto";
-import "GameObject.proto";
-package spacecluster.io;
+﻿import "GameObject.proto";
 
 // Server-initiated message
 message GameEvent
