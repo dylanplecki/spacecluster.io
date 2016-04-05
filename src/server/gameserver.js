@@ -179,7 +179,7 @@ engine.onServerTick = function() {
     });
     var byteBuffer = message.encode();
     engine.wss.broadcast(byteBuffer.toBuffer(),
-        { binary: true, mask: true });
+        { binary: true, mask: false });
 
     // Move to next frame
     ++engine.tick;
@@ -243,7 +243,7 @@ engine.onClientConnect = function(ws) {
 
     // Convert to byte buffer and send
     var byteBuffer = message.encode();
-    ws.send(byteBuffer.toBuffer(), { binary: true, mask: true });
+    ws.send(byteBuffer.toBuffer(), { binary: true, mask: false });
 };
 
 /**
