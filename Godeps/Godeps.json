@@ -2,5 +2,44 @@
 	"ImportPath": "github.com/dylanplecki/spacecluster.io",
 	"GoVersion": "go1.5",
 	"GodepVersion": "v60",
-	"Deps": []
+	"Deps": [
+		{
+			"ImportPath": "github.com/golang/protobuf/proto",
+			"Rev": "dda510ac0fd43b39770f22ac6260eb91d377bce3"
+		},
+		{
+			"ImportPath": "github.com/gorilla/websocket",
+			"Rev": "e2e3d8414d0fbae04004f151979f4e27c6747fe7"
+		},
+		{
+			"ImportPath": "github.com/klauspost/compress/flate",
+			"Comment": "v1.0-5-g9d711f4",
+			"Rev": "9d711f4445beb7f6488148ce04e3b4dc6e72242d"
+		},
+		{
+			"ImportPath": "github.com/klauspost/compress/gzip",
+			"Comment": "v1.0-5-g9d711f4",
+			"Rev": "9d711f4445beb7f6488148ce04e3b4dc6e72242d"
+		},
+		{
+			"ImportPath": "github.com/klauspost/compress/zlib",
+			"Comment": "v1.0-5-g9d711f4",
+			"Rev": "9d711f4445beb7f6488148ce04e3b4dc6e72242d"
+		},
+		{
+			"ImportPath": "github.com/klauspost/cpuid",
+			"Comment": "v1.0",
+			"Rev": "09cded8978dc9e80714c4d85b0322337b0a1e5e0"
+		},
+		{
+			"ImportPath": "github.com/klauspost/crc32",
+			"Comment": "v1.0",
+			"Rev": "19b0b332c9e4516a6370a0456e6182c3b5036720"
+		},
+		{
+			"ImportPath": "github.com/valyala/fasthttp",
+			"Comment": "v20160316-40-ge9544cb",
+			"Rev": "e9544cbb6fb446b65697099b65ff43cb7e225d7a"
+		}
+	]
 }
