@@ -1,0 +1,9 @@
+﻿import "GameObject.proto";
+import "GameEvent.proto";
+
+// Server-initiated message
+message GameHeartbeat
+{
+	repeated GameEvent Events = 2;
+	repeated GameObjUpdate Updates = 3;
+}
