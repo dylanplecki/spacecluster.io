@@ -1,0 +1,18 @@
+﻿{
+    "server": {
+        "address": ":8080",
+        "name": "test-1",
+        "region": "us-northeast-do-1",
+        "log_level": "info",
+        "max_procs": -1,
+        "http": {
+            "enable_compression": false
+        }
+    },
+    "game_engine": {
+        "max_players": 256,
+        "tick_rate": 30,
+        "frame_lookback_length": 30,
+        "player_kick_timeout": 3
+    }
+}
