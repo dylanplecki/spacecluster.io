@@ -8,11 +8,11 @@ import "ServerInfo.proto";
 
 message Message
 {
-    required uint64 Tick = 1;
+    required uint64 SyncTick = 1;
     oneof Payload {
         GameEvent GameEvent = 2;
         GameHeartbeat GameHeartbeat = 3;
         GameObjUpdate GameObjUpdate = 4;
-        ServerInfo ServerInfo = 5;
+        GameState GameState = 5;
     }
 }

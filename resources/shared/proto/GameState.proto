@@ -1,0 +1,20 @@
+syntax = "proto2";
+package spacecluster;
+
+import "GameObject.proto";
+import "ServerInfo.proto";
+
+message GameObjStateExt {
+	required uint64 ObjId = 1;
+	required uint64 LastUpdatedTick = 2;
+	required GameObjState ObjState = 3;
+	required string ObjType = 4;
+	required string ObjTheme = 5;
+	required string Description = 6;
+}
+
+message GameState {
+    required uint64 SyncTick = 1;
+    required ServerInfo ServerInfo = 2;
+	repeated GameObjStateExt ObjStates = 3;
+}

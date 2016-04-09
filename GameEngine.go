@@ -51,7 +51,9 @@ func init() {
         procs = runtime.NumCPU()
     }
     runtime.GOMAXPROCS(procs)
+}
 
+func main() {
     // Start HTTP server
     h := httpRequestHandler
 	if viper.GetBool("server.http.enable_compression") {
@@ -61,19 +63,6 @@ func init() {
     err != nil {
 		log.Fatalf("Error in ListenAndServe: %s", err)
 	}
-}
-
-type configuration struct {
-    addr string
-    name string
-    region string
-    maxPlayers uint32
-    tickRate uint32 // Hertz (ticks per second)
-    frameLookbackLength uint32 // Frames
-    playerKickTimeout uint32 // Seconds
-    logLevel string
-    maxProcs int
-    httpEnableCompress bool
 }
 
 func setDefaultViperConfig() {
@@ -100,22 +89,20 @@ func httpRequestHandler(ctx *fasthttp.RequestCtx) {
 // GameEngine exported
 var GameEngine gameEngine
 
-// GameEngine exported
 type gameEngine struct {
     tick uint64
     playerCount uint32
     frames []gameFrame
     objects []gameObject
+    broadcastFrame gameFrame
 }
 
-// GameFrame exported
 type gameFrame struct {
     tick uint64
     events []GameEvent
     updates []GameObjUpdate
 }
 
-// GameObject exported
 type gameObject struct {
     state GameObjUpdate
     isPlayer bool
