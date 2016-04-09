@@ -9,8 +9,15 @@ var size = 50;
 
 var foods = [];
 var target = {x: 0, y: 0};
-var player = {x: screenWidth/2, y: screenHeight/2}
-var velocity = 1/50
+var velocity = 1/60
+var gameObjs = [];
+var main    = new GameObj(5, screenWidth/2, screenHeight/2, 50, 2, 100,"dude", "main", "#330000");
+gameObjs[0] = new GameObj(0, 1000, 1000, 10, 4, 270, "player", "ragusauce", "#234094");
+gameObjs[1] = new GameObj(1, 500, 20, 100, 4, 180, "player", "ragusauce2", "#F33023");
+gameObjs[2] = new GameObj(2, 10, 500, 30, 4, 170, "player", "pn", "#DEF8AF");
+gameObjs[3] = new GameObj(3, 800, 900, 60, 4, 360, "player", "dPlecki", "#F324FA");
+gameObjs[4] = new GameObj(4, 30, 30, 200, 4, 170, "player", "dooope", "#ABCDEF");
+
 
 function drawCircle(centerX, centerY, radius, sides) {
     var theta = 0;
@@ -35,8 +42,11 @@ function drawFood(food){
     ctx.fillStyle = "#FFFFFF";
     food.x -= target.x * velocity;
     food.y -= target.y * velocity;
-    if(food.x < player.x + size && food.x > player.x - size && food.y < player.y + size && food.y > player.y - size && food.draw == true){
-        size += 1;
+    if(food.x < main.x + main.size && food.x > main.x - main.size
+         && food.y < main.y + main.size && food.y > main.y - main.size 
+         && food.draw == true)
+    {
+        main.size += 1;
         food.draw = false;
     }
     else if (food.draw == true)
@@ -87,14 +97,43 @@ function draw() {
     drawBackground();
     drawgrid();
     foods.forEach(drawFood);
-    drawPlayer();
+    drawMain(main);
+    
+    /* ITERATOR FOR TREE
+    var it = tree.iterator(), item;
+    while((item = it.next()) !== null)
+    {
+        
+    }
+    */
+    
+    gameObjs.forEach(drawPlayer);
 }
 draw();
 
-function drawPlayer() {
-    ctx.fillStyle = "#330000";
-    drawCircle(screenWidth/2, screenHeight/2, size, 100);
+function drawPlayer(player) {
+    ctx.fillStyle = player.theme;
+  
+    player.x -= target.x * velocity;
+    player.y -= target.y * velocity;
+    
+    if (player.x + player.size > main.x - screenWidth/2 
+        && player.x - player.size < main.x + screenWidth/2
+        && player.y + player.size > main.y - screenWidth/2
+        && player.y - player.size < main.y + screenWidth/2)
+    {
+        var y = player.y % screenHeight;
+        var x = player.x % screenWidth;
+        drawCircle(x, y, player.size, 100);
+    }
 }
+
+function drawMain(player)
+{
+    ctx.fillStyle = player.theme;
+    drawCircle(screenWidth/2, screenHeight/2, player.size, 100);
+}
+
 
 function gameInput(mouse) {
 	if (!directionLock) {
@@ -103,6 +142,17 @@ function gameInput(mouse) {
 	}
 }
 
+function GameObj(id, x, y, size, velocity, azimuth, type, name, theme) {
+	this.id = id;
+	this.x  = x;
+	this.y = y;
+	this.size = size;
+    this.velocity = velocity;
+	this.azimuth = azimuth;
+	this.type = type;
+	this.description = name;
+	this.theme = theme;
+}
 
 
 // Needed to have animation frames work on all browsers: Found on github
