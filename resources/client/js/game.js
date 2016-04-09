@@ -10,12 +10,13 @@ var size = 50;
 var foods = [];
 var target = {x: 0, y: 0};
 var player = {x: screenWidth/2, y: screenHeight/2}
+var velocity = 1/50
 
 function drawCircle(centerX, centerY, radius, sides) {
     var theta = 0;
     var x = 0;
     var y = 0;
-
+ 
     ctx.beginPath();
 
     for (var i = 0; i < sides; i++) {
@@ -32,8 +33,8 @@ function drawCircle(centerX, centerY, radius, sides) {
 
 function drawFood(food){
     ctx.fillStyle = "#FFFFFF";
-    food.x -= target.x * 1/50;
-    food.y -= target.y * 1/50;
+    food.x -= target.x * velocity;
+    food.y -= target.y * velocity;
     if(food.x < player.x + size && food.x > player.x - size && food.y < player.y + size && food.y > player.y - size && food.draw == true){
         size += 1;
         food.draw = false;
