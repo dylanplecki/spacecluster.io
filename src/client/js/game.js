@@ -1,6 +1,6 @@
 var serverInfo;
-var tree = new BinTree(function(a, b) { return a.id - b.id});
-var main = new GameObj(0, 30, 30, 100, 1, 270, "player", "ragusauce", "blue");
+tree = new BinTree(function(a, b) { return a.id - b.id});
+main = new GameObj(Math.floor((Math.random() * 1000) + 1), 100, 100, 50, 2, 100,"dude", "main", '#'+Math.floor(Math.random()*16777215).toString(16));
 var t;
 (function() {
 
@@ -117,9 +117,9 @@ var t;
  			});
  			var msg = message.encode()
  			send(msg);
- 			main.id = main.id + 1;
- 			main.x = main.x + 1;
- 			main.y = main.y + 1;
+ 			//main.id = main.id + 1;
+ 			//main.x = main.x + 1;
+ 			//main.y = main.y + 1;
  			//console.log("lit");
 
 		} catch (err) {

@@ -11,7 +11,7 @@ var foods = [];
 var target = {x: 0, y: 0};
 var velocity = 1/60
 var gameObjs = [];
-var main    = new GameObj(5, 100, 100, 50, 2, 100,"dude", "main", "#330000");
+//var main    = new GameObj(5, 100, 100, 50, 2, 100,"dude", "main", "#330000");
 gameObjs[0] = new GameObj(0, 1000, 1000, 10, 4, 270, "player", "ragusauce", "#234094");
 gameObjs[1] = new GameObj(1, 500, 20, 100, 4, 180, "player", "ragusauce2", "#F33023");
 gameObjs[2] = new GameObj(2, 10, 500, 60, 4, 170, "player", "pn", "#DEF8AF");
@@ -102,13 +102,13 @@ function draw() {
     //foods.forEach(drawFood);
     drawMain(main);
     
-    /* ITERATOR FOR TREE
+    // ITERATOR FOR TREE
     var it = tree.iterator(), item;
     while((item = it.next()) !== null)
     {
-        
+        drawPlayer(item);
     }
-    */
+    
     
     gameObjs.forEach(drawPlayer);
 }
@@ -132,8 +132,8 @@ function drawPlayer(player) {
 function drawMain(player)
 {
     ctx.fillStyle = player.theme;
-    main.x += target.x * velocity;
-    main.y += target.y * velocity;
+    main.x += parseInt(target.x * velocity);
+    main.y += parseInt(target.y * velocity);
     drawCircle(screenWidth/2, screenHeight/2, player.size, 100);
 }
 
