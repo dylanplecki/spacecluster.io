@@ -1,14 +1,14 @@
-﻿import "GameObject.proto";
+syntax = "proto2";
+package spacecluster;
+
+import "GameObject.proto";
 
 // Server-initiated message
-message GameEvent
-{
-	required string InitObjId = 3; // Event initiator, 0 = server
-	required string TargetObjId = 4; // Event target, 0 = server
-	oneof Payload
-	{
-		PlayerJoinedPayload PlayerJoined = 5;
-		PlayerLeftPayload PlayerLeft = 6;
+message GameEvent {
+	required uint64 Tick = 1;
+	required uint64 InitObjId = 3; // Event initiator, 0 = server
+	required uint64 TargetObjId = 4; // Event target, 0 = server
+	oneof Payload {
 		ObjectAbsorbedPayload ObjectAbsorbed = 7;
 		ObjectDestroyedPayload ObjectDestroyed = 8;
 		ObjectSplitPayload ObjectSplit = 9;
@@ -16,46 +16,29 @@ message GameEvent
 	}
 }
 
-message PlayerJoinedPayload
-{
-	// InitObjId = ???
-	// TargetObjId = Joined Player
-	required string Name = 1;
-	required string ObjTheme = 2;
-}
-
-message PlayerLeftPayload
-{
-	// InitObjId = ???
-	// TargetObjId = Leaving Player
-	optional string LeaveAnimation = 1;
-}
-
-message ObjectAbsorbedPayload
-{
+message ObjectAbsorbedPayload {
 	// InitObjId = Absorber (or server, equiv. to destroy)
 	// TargetObjId = Absorbed
 	required uint32 NewInitSize = 1;
 }
 
-message ObjectDestroyedPayload
-{
+message ObjectDestroyedPayload {
 	// InitObjId = Destroyer (or server)
 	// TargetObjId = Destroyed
 	optional string DestroyReason = 1;
 }
 
-message ObjectSplitPayload
-{
+message ObjectSplitPayload {
 	// InitObjId = Splitting Initiator (or server)
 	// TargetObjId = Split Object
 	repeated CreateObjectPayload CreatedObjects = 1;
 }
 
-message CreateObjectPayload
-{
+message CreateObjectPayload {
 	// InitObjId = Parent Object (or server)
 	// TargetObjId = New Object
-	required string ObjType = 2;
-	required GameObjState InitialState = 3;
+	required string ObjType = 1; // Food, player, etc.
+	required string ObjTheme = 2; // Color, etc.
+	required string Description = 3; // Name, username, etc.
+	required GameObjState InitialState = 4;
 }

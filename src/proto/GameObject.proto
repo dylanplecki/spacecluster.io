@@ -1,6 +1,7 @@
+syntax = "proto2";
+package spacecluster;
 
-message GameObjState
-{
+message GameObjState {
 	required uint32 XPos = 1;
 	required uint32 YPos = 2;
 	required uint32 Size = 3;
@@ -8,8 +9,8 @@ message GameObjState
 	required float Azimuth = 5;
 }
 
-message GameObjUpdate
-{
-	required string ObjId = 2;
+message GameObjUpdate {
+	required uint64 Tick = 1;
+	required uint64 ObjId = 2;
 	required GameObjState ObjState = 3;
 }

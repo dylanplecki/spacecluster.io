@@ -1,6 +1,7 @@
-﻿
-message ServerInfo
-{
+syntax = "proto2";
+package spacecluster;
+
+message ServerInfo {
 	required string ServerId = 1;
 	required string ServerName = 2;
 	required string ServerRegion = 3;
