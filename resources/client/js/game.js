@@ -11,13 +11,16 @@ var foods = [];
 var target = {x: 0, y: 0};
 var velocity = 1/60
 var gameObjs = [];
-var main    = new GameObj(5, screenWidth/2, screenHeight/2, 50, 2, 100,"dude", "main", "#330000");
+var main    = new GameObj(5, 100, 100, 50, 2, 100,"dude", "main", "#330000");
 gameObjs[0] = new GameObj(0, 1000, 1000, 10, 4, 270, "player", "ragusauce", "#234094");
 gameObjs[1] = new GameObj(1, 500, 20, 100, 4, 180, "player", "ragusauce2", "#F33023");
-gameObjs[2] = new GameObj(2, 10, 500, 30, 4, 170, "player", "pn", "#DEF8AF");
-gameObjs[3] = new GameObj(3, 800, 900, 60, 4, 360, "player", "dPlecki", "#F324FA");
-gameObjs[4] = new GameObj(4, 30, 30, 200, 4, 170, "player", "dooope", "#ABCDEF");
+gameObjs[2] = new GameObj(2, 10, 500, 60, 4, 170, "player", "pn", "#DEF8AF");
+gameObjs[3] = new GameObj(3, 800, 900, 60, 4, 360, "player", "dPlecki", "#F324FA"); // PINK
+gameObjs[4] = new GameObj(4, 30, 30, 200, 4, 170, "player", "dooope", "#ABCDEF");  // BLUE
 
+//DEBUG
+console.log("SCREENWIDTH: " + screenWidth);
+console.log("SCREENHEIGHT: " + screenHeight);
 
 function drawCircle(centerX, centerY, radius, sides) {
     var theta = 0;
@@ -96,7 +99,7 @@ function draw() {
     requestAnimationFrame(draw);
     drawBackground();
     drawgrid();
-    foods.forEach(drawFood);
+    //foods.forEach(drawFood);
     drawMain(main);
     
     /* ITERATOR FOR TREE
@@ -113,17 +116,15 @@ draw();
 
 function drawPlayer(player) {
     ctx.fillStyle = player.theme;
-  
-    player.x -= target.x * velocity;
-    player.y -= target.y * velocity;
-    
-    if (player.x + player.size > main.x - screenWidth/2 
+
+    if (   player.x + player.size > main.x - screenWidth/2 
         && player.x - player.size < main.x + screenWidth/2
-        && player.y + player.size > main.y - screenWidth/2
-        && player.y - player.size < main.y + screenWidth/2)
+        && player.y + player.size > main.y - screenHeight/2
+        && player.y - player.size < main.y + screenHeight/2)
     {
-        var y = player.y % screenHeight;
-        var x = player.x % screenWidth;
+        var y = (player.y) % screenHeight + screenHeight/2 - main.y % screenHeight; // TRnslate so main is in middle
+        var x = (player.x) % screenWidth  + screenWidth/2 - main.x % screenWidth; // Translate so main is in middle
+        
         drawCircle(x, y, player.size, 100);
     }
 }
@@ -131,6 +132,8 @@ function drawPlayer(player) {
 function drawMain(player)
 {
     ctx.fillStyle = player.theme;
+    main.x += target.x * velocity;
+    main.y += target.y * velocity;
     drawCircle(screenWidth/2, screenHeight/2, player.size, 100);
 }
 
