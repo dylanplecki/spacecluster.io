@@ -1,7 +1,7 @@
 ﻿var uuid = require('node-uuid');
 var winston = require('winston');
 var logger = new winston.Logger();
-var protobuf = require('protobufjs');
+var ProtoBuf = require('protobufjs');
 
 var exports = module.exports = {};
 
@@ -18,16 +18,16 @@ function UidGenerator() {
 var uidGenerator = new UidGenerator();
 
 /*------------------*/
-/* Protobuf Loaders */
+/* ProtoBuf Loaders */
 /*------------------*/
 
-var protobuilder = protobuf.newBuilder();
-protobuf.loadProtoFile('proto/Common.proto', protobuilder);
-protobuf.loadProtoFile('proto/GameEvent.proto', protobuilder);
-protobuf.loadProtoFile('proto/GameHeartbeat.proto', protobuilder);
-protobuf.loadProtoFile('proto/GameObject.proto', protobuilder);
-protobuf.loadProtoFile('proto/Message.proto', protobuilder);
-protobuf.loadProtoFile('proto/ServerInfo.proto', protobuilder);
+var protobuilder = ProtoBuf.newBuilder();
+ProtoBuf.loadProtoFile('proto/Common.proto', protobuilder);
+ProtoBuf.loadProtoFile('proto/GameEvent.proto', protobuilder);
+ProtoBuf.loadProtoFile('proto/GameHeartbeat.proto', protobuilder);
+ProtoBuf.loadProtoFile('proto/GameObject.proto', protobuilder);
+ProtoBuf.loadProtoFile('proto/Message.proto', protobuilder);
+ProtoBuf.loadProtoFile('proto/ServerInfo.proto', protobuilder);
 var protoroot = protobuilder.build();
 
 var test = new protoroot.GameHeartbeat({
@@ -68,7 +68,7 @@ function GameFrame(tick) {
         this.events.push(event);
     };
     this.addUpdate = function(update) {
-        this.events.push(update);
+        this.updates.push(update);
     };
     this.toHeartbeat = function() {
         return new protoroot.GameHeartbeat({
@@ -131,9 +131,10 @@ engine.addEventToFrame = function(frame, event) {
     // TODO: Validate event
 
     // Process player events
+    var player;
     switch (event.Payload) {
         case 'PlayerJoined':
-            var player = new Player(event.PlayerJoined.Name,
+            player = new Player(event.PlayerJoined.Name,
                 event.PlayerJoined.ObjTheme);
             event.TargetObjId = player.id;
             engine.addNewPlayer(player);
@@ -143,7 +144,7 @@ engine.addEventToFrame = function(frame, event) {
                 logger.warn('Invalid player attempted to leave.');
                 return;
             }
-            var player = engine.players[event.TargetObjId];
+            player = engine.players[event.TargetObjId];
             engine.removePlayer(player);
             break;
         default:
