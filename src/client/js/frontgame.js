@@ -122,8 +122,8 @@ function drawPlayer(player) {
         && player.y + player.size > main.y - screenHeight/2
         && player.y - player.size < main.y + screenHeight/2)
     {
-        var y = (player.y) % screenHeight + screenHeight/2 - main.y % screenHeight; // TRnslate so main is in middle
-        var x = (player.x) % screenWidth  + screenWidth/2 - main.x % screenWidth; // Translate so main is in middle
+        var y = (player.y) + screenHeight/2 - main.y; // Trnslate so main is in middle
+        var x = (player.x) + screenWidth/2 - main.x; // Translate so main is in middle
         
         drawCircle(x, y, player.size, 100);
     }
