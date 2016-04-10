@@ -9,12 +9,6 @@ import (
 )
 
 /*
- * Game Engine Constants
-*/
-
-const configFile = "resources/config.json"
-
-/*
  * Game Engine Base
 */
 
