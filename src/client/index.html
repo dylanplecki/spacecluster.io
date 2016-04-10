@@ -1,12 +1,17 @@
 <!DOCTYPE html>
-<html>
-<head>
-</head>
-<body>
-	<script src="./js/Long.min.js"></script>         <!-- https://raw.github.com/dcodeIO/Long.js/master/dist/Long.min.js -->
-<script src="./js/ByteBufferAB.min.js"></script> <!-- https://raw.github.com/dcodeIO/ByteBuffer.js/master/dist/ByteBufferAB.min.js -->
-<script src="./js/ProtoBuf.min.js"></script>     <!-- https://raw.github.com/dcodeIO/ProtoBuf.js/master/dist/ProtoBuf.min.js -->
-<script src="./js/bintree.js"></script>
-<script src="./js/game.js"></script> 
-</body>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Simple Canvas Game</title>
+        <style>
+            * { margin:0; padding:0; }
+            html, body { width:100%; height:100%; } /* just to be sure these are full screen*/
+
+canvas { display:block; } /* To remove the scrollbars */
+            </style>
+	</head>
+	<body>
+			<canvas id="cvs"></canvas>
+		<script src="js/frontgame.js"></script>
+	</body>
 </html>
