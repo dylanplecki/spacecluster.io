@@ -42,7 +42,7 @@ var t;
 			t = msg.Tick;
 			switch (which) {
 				case 'GameHeartbeat':
-					if(tick > t) break;
+					//if(tick > t) break;
 					//var arrayLength = Event.length;
 					//for(var i = 0; i < arrayLength; i++) {
 					//	
