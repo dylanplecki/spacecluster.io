@@ -49,7 +49,7 @@ var t;
 					//}
 					
 					var updates = msg.GameHeartbeat.Updates;
-					console.log(updates);
+					//console.log(updates);
 					var updateLength = updates.length;
 					for(var i = 0; i < updateLength; i++) {
 						var update = updates[i];
@@ -97,7 +97,7 @@ var t;
 						msg.ServerInfo.LongSize);
 						break;
 				default:
-					console.log(which);
+					//console.log(which);
 					break;
 			}
  			//console.log("Recieved: [" + msg + "]" + which + ".");
