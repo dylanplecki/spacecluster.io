@@ -1,0 +1,15 @@
+
+message GameObjState
+{
+	required uint32 XPos = 1;
+	required uint32 YPos = 2;
+	required uint32 Size = 3;
+	required float Velocity = 4;
+	required float Azimuth = 5;
+}
+
+message GameObjUpdate
+{
+	required string ObjId = 2;
+	required GameObjState ObjState = 3;
+}

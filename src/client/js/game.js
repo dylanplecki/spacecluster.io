@@ -1,6 +1,6 @@
 var serverInfo;
-var tree = new BinTree(function(a, b) { return a.id - b.id});
-var main = new GameObj(0, 30, 30, 100, 1, 270, "player", "ragusauce", "blue");
+tree = new BinTree(function(a, b) { return a.id - b.id});
+main = new GameObj(Math.floor((Math.random() * 1000) + 1), 100, 100, 50, 2, 100,"dude", "main", '#'+Math.floor(Math.random()*16777215).toString(16));
 var t;
 (function() {
 
@@ -38,16 +38,18 @@ var t;
 			var msg = protoroot.Message.decode(evt.data),
 				which = msg.Payload;
 			if (which == null) throw "ERROR";
+			var tick = 0;
 			t = msg.Tick;
 			switch (which) {
 				case 'GameHeartbeat':
+					//if(tick > t) break;
 					//var arrayLength = Event.length;
 					//for(var i = 0; i < arrayLength; i++) {
 					//	
 					//}
 					
 					var updates = msg.GameHeartbeat.Updates;
-					console.log(updates);
+					//console.log(updates);
 					var updateLength = updates.length;
 					for(var i = 0; i < updateLength; i++) {
 						var update = updates[i];
@@ -63,6 +65,7 @@ var t;
 								update.ObjId,
 								'#'+Math.floor(Math.random()*16777215).toString(16)
 						);
+						if(obj.id == main.id) break;
 						var node = tree.find(obj);
 						if(node == null) {
 							tree.insert(obj)
@@ -74,6 +77,7 @@ var t;
 							node.azimuth = obj.azimuth;
 						}
 					}
+					tick = msg.Tick;
 					//console.log(obj);
 					break;
 
@@ -93,7 +97,7 @@ var t;
 						msg.ServerInfo.LongSize);
 						break;
 				default:
-					console.log(which);
+					//console.log(which);
 					break;
 			}
  			//console.log("Recieved: [" + msg + "]" + which + ".");
@@ -117,9 +121,9 @@ var t;
  			});
  			var msg = message.encode()
  			send(msg);
- 			main.id = main.id + 1;
- 			main.x = main.x + 1;
- 			main.y = main.y + 1;
+ 			//main.id = main.id + 1;
+ 			//main.x = main.x + 1;
+ 			//main.y = main.y + 1;
  			//console.log("lit");
 
 		} catch (err) {
