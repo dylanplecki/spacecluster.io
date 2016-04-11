@@ -4,10 +4,6 @@ main = new GameObj(Math.floor((Math.random() * 1000) + 1), 100, 100, 50, 2, 100,
 	'#'+Math.floor(Math.random()*16777215).toString(16));
 var t;
 
-settings = {
-	log_tps: true
-};
-
 (function() {
 	var tps = 0;
 	var tps_last = Date.now();
