@@ -63,6 +63,7 @@ var t;
 								update.ObjId,
 								'#'+Math.floor(Math.random()*16777215).toString(16)
 						);
+						if(obj.id == main.id) break;
 						var node = tree.find(obj);
 						if(node == null) {
 							tree.insert(obj)
