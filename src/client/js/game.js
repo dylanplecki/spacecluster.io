@@ -38,9 +38,11 @@ var t;
 			var msg = protoroot.Message.decode(evt.data),
 				which = msg.Payload;
 			if (which == null) throw "ERROR";
+			var tick = 0;
 			t = msg.Tick;
 			switch (which) {
 				case 'GameHeartbeat':
+					if(tick > t) break;
 					//var arrayLength = Event.length;
 					//for(var i = 0; i < arrayLength; i++) {
 					//	
@@ -75,6 +77,7 @@ var t;
 							node.azimuth = obj.azimuth;
 						}
 					}
+					tick = msg.Tick;
 					//console.log(obj);
 					break;
 
