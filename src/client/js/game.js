@@ -1,21 +1,39 @@
 var serverInfo;
 tree = new BinTree(function(a, b) { return a.id - b.id});
-main = new GameObj(Math.floor((Math.random() * 1000) + 1), 100, 100, 50, 2, 100,"dude", "main", '#'+Math.floor(Math.random()*16777215).toString(16));
+main = new GameObj(Math.floor((Math.random() * 1000) + 1), 100, 100, 50, 2, 100,"dude", "main",
+	'#'+Math.floor(Math.random()*16777215).toString(16));
 var t;
+
+settings = {
+	log_tps: true
+};
+
 (function() {
+	var tps = 0;
+	var tps_last = Date.now();
 
 	var ProtoBuf = dcodeIO.ProtoBuf;
 	var protobuilder = ProtoBuf.newBuilder();
-    ProtoBuf.loadProtoFile('./proto/Common.proto', protobuilder);
-    ProtoBuf.loadProtoFile('./proto/GameEvent.proto', protobuilder);
-    ProtoBuf.loadProtoFile("./proto/GameHeartbeat.proto", protobuilder);
-    ProtoBuf.loadProtoFile("./proto/GameObject.proto", protobuilder);
-    ProtoBuf.loadProtoFile("./proto/Message.proto", protobuilder);
-    ProtoBuf.loadProtoFile("./proto/ServerInfo.proto", protobuilder);
-    var protoroot = protobuilder.build();
+	ProtoBuf.loadProtoFile('./proto/Common.proto', protobuilder);
+	ProtoBuf.loadProtoFile('./proto/GameEvent.proto', protobuilder);
+	ProtoBuf.loadProtoFile("./proto/GameHeartbeat.proto", protobuilder);
+	ProtoBuf.loadProtoFile("./proto/GameObject.proto", protobuilder);
+	ProtoBuf.loadProtoFile("./proto/Message.proto", protobuilder);
+	ProtoBuf.loadProtoFile("./proto/ServerInfo.proto", protobuilder);
+	var protoroot = protobuilder.build();
 
 	var socket = new WebSocket("ws://srv01.test.sc.plecki.net:8080");
 	socket.binaryType = "arraybuffer";
+
+	// TPS logging
+	setInterval(function () {
+		if (settings.log_tps) {
+			var time = Date.now() - tps_last;
+			console.log("TPS [%f]: %d", time / 1000, tps);
+			tps_last = Date.now();
+			tps = 0;
+		}
+	}, 1000);
 
 	function send(msg) {
 		if(socket.readyState == WebSocket.OPEN) {
@@ -42,6 +60,8 @@ var t;
 			t = msg.Tick;
 			switch (which) {
 				case 'GameHeartbeat':
+					if (settings.log_tps) ++tps;
+
 					//if(tick > t) break;
 					//var arrayLength = Event.length;
 					//for(var i = 0; i < arrayLength; i++) {
@@ -119,8 +139,8 @@ var t;
  				Tick: t,
  				GameObjUpdate: ObjUpdate
  			});
- 			var msg = message.encode()
- 			send(msg);
+ 			var new_msg = message.encode();
+ 			send(new_msg);
  			//main.id = main.id + 1;
  			//main.x = main.x + 1;
  			//main.y = main.y + 1;
@@ -132,14 +152,7 @@ var t;
 		
 		//console.log(evt);		
 	};
-
-
-
-
-
 })();
-
-
 
 function GameObj(id, x, y, size, velocity, azimuth, type, name, theme) {
 	this.id = id;
@@ -180,7 +193,3 @@ function GameObjUpdate(id, ObjState) {
 	this.ObjId = id;
 	this.GameObjState = ObjState;
 }
-
-
-
-
