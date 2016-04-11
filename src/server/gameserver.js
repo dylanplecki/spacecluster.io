@@ -220,7 +220,7 @@ engine.removePlayer = function(player) {
 engine.onClientConnect = function(ws) {
     logger.debug('New client connected to server');
 
-    // Send server info
+    // Build server info
     var serverInfo = new protoroot.ServerInfo({
         ServerId: engine.id,
         ServerName: engine.serverName,
