@@ -126,6 +126,8 @@ function drawPlayer(player) {
         var x = (player.x) + screenWidth/2 - main.x; // Translate so main is in middle
         
         drawCircle(x, y, player.size, 100);
+        ctx.fillStyle = "#000000"
+        ctx.fillText(player.x + " " + player.y, x, y);
     }
 }
 
@@ -135,6 +137,8 @@ function drawMain(player)
     main.x += parseInt(target.x * velocity);
     main.y += parseInt(target.y * velocity);
     drawCircle(screenWidth/2, screenHeight/2, player.size, 100);
+    ctx.fillStyle = "#000000"
+    ctx.fillText(main.x + " " + main.y, screenWidth/2, screenHeight/2);
 }
 
 
