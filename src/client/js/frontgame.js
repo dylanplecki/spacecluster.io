@@ -71,22 +71,22 @@ createFood();
 c.addEventListener('mousemove', gameInput, false);
 
 function drawBackground(){
-    ctx.fillStyle = "#FFFFFF";
+    ctx.fillStyle = "#000000";
     ctx.fillRect(0, 0, screenWidth, screenHeight);
 }
 
 function drawgrid() {
      ctx.lineWidth = 1;
-     ctx.strokeStyle = "#000000";
+     ctx.strokeStyle = "#FFFFFF";
      ctx.globalAlpha = 0.15;
      ctx.beginPath();
 
-    for (var x = -1 * main.x /50; x < screenWidth; x += screenHeight / 18) {
+    for (var x = -1 * main.x * velocity; x < screenWidth; x += screenHeight / 18) {
         ctx.moveTo(x, 0);
         ctx.lineTo(x, screenHeight);
     }
 
-    for (var y = -1 * main.y /50; y < screenHeight; y += screenHeight / 18) {
+    for (var y = -1 * main.y * velocity; y < screenHeight; y += screenHeight / 18) {
         ctx.moveTo(0, y);
         ctx.lineTo(screenWidth, y);
     }
