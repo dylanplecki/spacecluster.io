@@ -9,7 +9,7 @@ var size = 50;
 
 var foods = [];
 var target = {x: 0, y: 0};
-var velocity = 1/60
+var velocity = 1/50
 var gameObjs = [];
 //var main    = new GameObj(5, 100, 100, 50, 2, 100,"dude", "main", "#330000");
 gameObjs[0] = new GameObj(0, 1000, 1000, 10, 4, 270, "player", "ragusauce", "#234094");
@@ -81,12 +81,12 @@ function drawgrid() {
      ctx.globalAlpha = 0.15;
      ctx.beginPath();
 
-    for (var x = -1 * main.x /30; x < screenWidth; x += screenHeight / 18) {
+    for (var x = -1 * main.x /50; x < screenWidth; x += screenHeight / 18) {
         ctx.moveTo(x, 0);
         ctx.lineTo(x, screenHeight);
     }
 
-    for (var y = -1 * main.y /30; y < screenHeight; y += screenHeight / 18) {
+    for (var y = -1 * main.y /50; y < screenHeight; y += screenHeight / 18) {
         ctx.moveTo(0, y);
         ctx.lineTo(screenWidth, y);
     }
