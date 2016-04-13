@@ -9,7 +9,7 @@ var size = 50;
 
 var foods = [];
 var target = {x: 0, y: 0};
-var velocity = 1/50
+var scalar = 1/50
 var gameObjs = [];
 //var main    = new GameObj(5, 100, 100, 50, 2, 100,"dude", "main", "#330000");
 gameObjs[0] = new GameObj(0, 1000, 1000, 10, 4, 270, "player", "ragusauce", "#234094");
@@ -47,8 +47,7 @@ function drawFood(food){
     var x = (food.x) + screenWidth/2 - main.x;
     
     distance = Math.sqrt( Math.pow(x-screenWidth/2, 2) + Math.pow(y - screenHeight/2, 2));
-    if(distance < main.size
-         && food.draw == true)
+    if(distance < main.size && food.draw == true)
     {
         main.size += 1;
         food.draw = false;
@@ -135,8 +134,8 @@ function drawPlayer(player) {
 function drawMain(player)
 {
     ctx.fillStyle = player.theme;
-    main.x += parseInt(target.x * velocity);
-    main.y += parseInt(target.y * velocity);
+    main.x += parseInt(target.x * scalar);
+    main.y += parseInt(target.y * scalar);
     drawCircle(screenWidth/2, screenHeight/2, player.size, 100);
     ctx.fillStyle = "#000000"
     ctx.fillText(main.x + " " + main.y, screenWidth/2, screenHeight/2);
