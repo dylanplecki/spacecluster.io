@@ -43,17 +43,18 @@ function drawCircle(centerX, centerY, radius, sides) {
 
 function drawFood(food){
     ctx.fillStyle = "#FFFFFF";
-    food.x -= target.x * velocity;
-    food.y -= target.y * velocity;
-    if(food.x < main.x + main.size && food.x > main.x - main.size
-         && food.y < main.y + main.size && food.y > main.y - main.size 
+    var y = (food.y) + screenHeight/2 - main.y; // Trnslate so main is in middle
+    var x = (food.x) + screenWidth/2 - main.x;
+    
+    distance = Math.sqrt( Math.pow(x-screenWidth/2, 2) + Math.pow(y - screenHeight/2, 2));
+    if(distance < main.size
          && food.draw == true)
     {
         main.size += 1;
         food.draw = false;
     }
     else if (food.draw == true)
-        drawCircle(food.x, food.y, 10, 10);
+        drawCircle(x, y, 10, 10);
 }
 
 // TESTING FUNCTION
@@ -99,7 +100,7 @@ function draw() {
     requestAnimationFrame(draw);
     drawBackground();
     drawgrid();
-    //foods.forEach(drawFood);
+    foods.forEach(drawFood);
     drawMain(main);
     
     // ITERATOR FOR TREE
