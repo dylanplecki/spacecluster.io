@@ -4,6 +4,8 @@
     "tick_rate": 30,
     "frame_lookback_length": 30,
     "player_kick_timeout": 3,
+    "initial_player_size": 50,
+    "player_start_radius": 5000,
     "location": {
       "latitude": 0,
       "longitude": 0,

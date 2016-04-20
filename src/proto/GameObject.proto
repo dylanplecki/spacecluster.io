@@ -11,6 +11,6 @@ message GameObjState {
 
 message GameObjUpdate {
 	required uint64 Tick = 1;
-	required string ObjId = 2;
+	required uint64 ObjId = 2;
 	required GameObjState ObjState = 3;
 }

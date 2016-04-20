@@ -5,7 +5,7 @@ import "GameObject.proto";
 import "ServerInfo.proto";
 
 message GameObjStateExt {
-	required string ObjId = 1;
+	required uint64 ObjId = 1;
 	required uint64 LastUpdatedTick = 2;
 	required GameObjState ObjState = 3;
 	required string ObjType = 4;

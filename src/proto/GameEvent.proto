@@ -6,8 +6,8 @@ import "GameObject.proto";
 // Server-initiated message
 message GameEvent {
 	required uint64 Tick = 1;
-	required string InitObjId = 3; // Event initiator, 0 = server
-	required string TargetObjId = 4; // Event target, 0 = server
+	required uint64 InitObjId = 3; // Event initiator, 0 = server
+	required uint64 TargetObjId = 4; // Event target, 0 = server
 	oneof Payload {
 		ObjectAbsorbedPayload ObjectAbsorbed = 7;
 		ObjectDestroyedPayload ObjectDestroyed = 8;

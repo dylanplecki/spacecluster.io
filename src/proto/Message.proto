@@ -6,9 +6,7 @@ import "GameHeartbeat.proto";
 import "GameObject.proto";
 import "ServerInfo.proto";
 
-message Message
-{
-    required uint64 SyncTick = 1;
+message Message {
     oneof Payload {
         GameEvent GameEvent = 2;
         GameHeartbeat GameHeartbeat = 3;
