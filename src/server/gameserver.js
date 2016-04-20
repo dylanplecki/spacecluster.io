@@ -9,19 +9,67 @@ var exports = module.exports = {};
 /* Game Data Descriptors */
 /*-----------------------*/
 
-function GameObject(id, type, x, y, z, vel, azi, size) {
-    if (id === null) {
-        this.id = uidGenerator.new();
-    } else {
-        this.id = id;
-    }
+function GameObject(id, type, x, y, vel, azi, size,
+                    theme, description) {
+    // Construct new game object
+    this.id = id;
     this.type = type;
     this.xPos = x;
     this.yPos = y;
-    this.zPos = z;
     this.velocity = vel;
     this.azimuth = azi;
     this.size = size;
+    this.theme = theme;
+    this.description = description;
+    this.isPlayer = type === "player";
+    this.lastUpdatedTick = -1;
+    this.dirty = false;
+    this.registeredEvents = [];
+
+    this.update = function(gameObjUpdate) {
+        // TODO: Validate object update
+        this.lastUpdatedTick = gameObjUpdate.Tick;
+        this.dirty = true; // TODO: Check for change
+        this.xPos = gameObjUpdate.ObjState.XPos;
+        this.yPos = gameObjUpdate.ObjState.YPos;
+        this.size = gameObjUpdate.ObjState.Size;
+        this.velocity = gameObjUpdate.ObjState.Velocity;
+        this.azimuth = gameObjUpdate.ObjState.Azimuth;
+    };
+
+    this.registerEvent = function(gameEvent) {
+        // TODO: Validate event
+        this.dirty = true;
+        this.registeredEvents.push(gameEvent);
+    };
+    this.toGameObjState = function(gameEngine) {
+        return new gameEngine.proto.GameObjState({
+            XPos: this.xPos,
+            YPos: this.yPos,
+            Size: this.size,
+            Velocity: this.velocity,
+            Azimuth: this.azimuth
+        });
+    };
+
+    this.toGameObjUpdate = function(gameEngine) {
+        return new gameEngine.proto.GameObjUpdate({
+            ObjId: this.id,
+            Tick: this.lastUpdatedTick,
+            ObjState: this.toGameObjState(gameEngine)
+        });
+    };
+
+    this.toGameObjStateExt = function(gameEngine) {
+        return new gameEngine.proto.GameObjStateExt({
+            ObjId: this.id,
+            ObjType: this.type,
+            ObjTheme: this.theme,
+            Description: this.description,
+            LastUpdateTick: this.lastUpdatedTick,
+            ObjState: this.toGameObjState(gameEngine)
+        });
+    };
 }
 
 /*----------------------------*/
@@ -30,13 +78,14 @@ function GameObject(id, type, x, y, z, vel, azi, size) {
 
 function GameEngine() {
     this.id = undefined;
+    this.idCounter = 0;
+    this.idFullRound = false;
     this.initialized = false;
     this.tick = 0;
-    this.frames = [];
     this.playerCount = 0;
     this.params = {};
-    this.proto = {};
     this.cache = {};
+    this.objects = {};
 }
 
 /**
@@ -55,18 +104,18 @@ GameEngine.prototype.initialize = function(wss, config) {
     logger.info('GameEngine Initializing...');
 
     // Initialize game engine space
-    this.id = this.generateUid();
+    this.id = uuid.v4();
     this.wss = wss;
 
     // Load the ProtoBuf
-    this.proto.builder = ProtoBuf.newBuilder();
-    ProtoBuf.loadProtoFile('proto/Common.proto', this.proto.builder);
-    ProtoBuf.loadProtoFile('proto/GameEvent.proto', this.proto.builder);
-    ProtoBuf.loadProtoFile('proto/GameHeartbeat.proto', this.proto.builder);
-    ProtoBuf.loadProtoFile('proto/GameObject.proto', this.proto.builder);
-    ProtoBuf.loadProtoFile('proto/Message.proto', this.proto.builder);
-    ProtoBuf.loadProtoFile('proto/ServerInfo.proto', this.proto.builder);
-    this.proto = this.proto.builder.build();
+    var protoBuilder = ProtoBuf.newBuilder();
+    ProtoBuf.loadProtoFile('proto/GameEvent.proto', protoBuilder);
+    ProtoBuf.loadProtoFile('proto/GameHeartbeat.proto', protoBuilder);
+    ProtoBuf.loadProtoFile('proto/GameObject.proto', protoBuilder);
+    ProtoBuf.loadProtoFile('proto/GameState.proto', protoBuilder);
+    ProtoBuf.loadProtoFile('proto/Message.proto', protoBuilder);
+    ProtoBuf.loadProtoFile('proto/ServerInfo.proto', protoBuilder);
+    this.proto = protoBuilder.build().spacecluster;
 
     // Get engine config options
     this.params.tickRate = config.get('game_engine.tick_rate');
@@ -77,6 +126,10 @@ GameEngine.prototype.initialize = function(wss, config) {
         config.get('game_engine.frame_lookback_length');
     this.params.playerKickTimeout =
         config.get('game_engine.player_kick_timeout');
+    this.params.initialPlayerSize =
+        config.get('game_engine.initial_player_size');
+    this.params.playerStartRadius =
+        config.get('game_engine.player_start_radius');
 
     this.params.location = {};
     this.params.location.latitude = config.get('game_engine.location.latitude');
@@ -91,9 +144,17 @@ GameEngine.prototype.initialize = function(wss, config) {
     // Initialize socket connection
     this.wss.on('connection', function(ws) {
         this.onClientConnect(ws);
-        ws.on('close', this.onClientDisconnect);
-        ws.on('message', this.onClientMessage);
-        ws.on('error', this.handleSocketError);
+        ws.on('close', function(code, reason) {
+            this.onClientDisconnect(ws, code, reason);
+        }.bind(this));
+
+        ws.on('message', function(data, flags) {
+            this.onClientMessage(ws, data, flags);
+        }.bind(this));
+
+        ws.on('error', function (error) {
+            this.handleSocketError(ws, error);
+        }.bind(this));
     }.bind(this));
 
     this.wss.broadcast = function(data, flags) {
@@ -103,7 +164,7 @@ GameEngine.prototype.initialize = function(wss, config) {
     };
 
     // Initialize tick broadcast mechanism
-    this.tickTimer = setInterval(this.onServerTick, this.params.frameTime);
+    this.tickTimer = setInterval(this.onServerTick.bind(this), this.params.frameTime);
 
     // Build server info
     this.cache.serverInfo = new this.proto.ServerInfo({
@@ -152,96 +213,101 @@ GameEngine.prototype.shutdown = function() {
  * Returns: UID string
  */
 GameEngine.prototype.generateUid = function() {
-    return uuid.v4();
+    var uid;
+    do {
+        if (this.idCounter == Number.MAX_VALUE) {
+            // Went full-round
+            this.idFullRound = true;
+            this.idCounter = 0;
+        }
+        uid = ++(this.idCounter);
+    } while (this.idFullRound && (uid in this.objects));
+    return uid;
 };
 
 /**
- * Function: GameEngine.addEventToFrame
+ * Function: GameEngine.createObjectFromEvent
  * Arguments:
- *      1. event: GameEvent to add to frame
+ *  1. gameCreateEvent: GameEvent (payload CreateObject) to base from
+ * Returns: New object (GameObject)
  */
-GameEngine.prototype.addEventToFrame = function(frame, event) {
-    // TODO: Validate event
+GameEngine.prototype.createObjectFromEvent = function(gameCreateEvent) {
+    // TODO: Validate creation
+    if (!gameCreateEvent.CreateObject) return null;
 
-    // Process player events
-    var player;
-    switch (event.Payload) {
-        case 'PlayerJoined':
-            player = new Player(event.PlayerJoined.Name,
-                event.PlayerJoined.ObjTheme);
-            event.TargetObjId = player.id;
-            this.addNewPlayer(player);
-            break;
-        case 'PlayerLeft':
-            if (!this.objects.hasOwnProperty(event.TargetObjId)) {
-                logger.warn('Invalid player attempted to leave.');
-                return;
-            }
-            player = this.objects[event.TargetObjId];
-            this.removePlayer(player);
-            break;
-        default:
-    }
+    var randomCentralPos = function(minPos, maxPos, radius) {
+        return minPos + ((maxPos - minPos) / 2) - radius + (Math.random() * radius * 2);
+    };
 
-    // Add event to store
-    frame.addEvent(event);
-    this.broadcastFrame.addEvent(event);
-};
+    // Generate creation data for game event
+    gameCreateEvent.TargetObjId = this.generateUid();
+    gameCreateEvent.CreateObject.InitialState.XPos =
+        randomCentralPos(0, this.params.location.latitude, this.params.playerStartRadius);
+    gameCreateEvent.CreateObject.InitialState.YPos =
+        randomCentralPos(0, this.params.location.longitude, this.params.playerStartRadius);
+    gameCreateEvent.CreateObject.InitialState.Velocity = 0;
+    gameCreateEvent.CreateObject.InitialState.Azimuth = 0;
+    gameCreateEvent.CreateObject.InitialState.Size = this.params.initialPlayerSize;
 
-/**
- * Function: GameEngine.addObjUpdateToFrame
- * Arguments:
- *      1. update: ObjUpdate to add to frame
- */
-GameEngine.prototype.addObjUpdateToFrame = function(frame, update) {
-    // TODO: Validate object update
-    // Add event to store
-    frame.addUpdate(update);
-    this.broadcastFrame.addUpdate(update);
+    // Create new game object and add to game engine
+    var obj = GameObj(
+        gameCreateEvent.TargetObjId, // ID
+        gameCreateEvent.CreateObject.ObjType, // Type
+        gameCreateEvent.CreateObject.InitialState.XPos, // X pos
+        gameCreateEvent.CreateObject.InitialState.YPos, // Y pos
+        gameCreateEvent.CreateObject.InitialState.Velocity, // Velocity
+        gameCreateEvent.CreateObject.InitialState.Azimuth, // Azimuth
+        gameCreateEvent.CreateObject.InitialState.Size, // Size
+        gameCreateEvent.CreateObject.ObjTheme, // Theme
+        gameCreateEvent.CreateObject.Description // Description
+    );
+
+    obj.dirty = true; // Done again in registerEvent
+    obj.lastUpdatedTick = gameCreateEvent.Tick;
+    obj.registerEvent(gameCreateEvent);
+
+    this.objects[obj.id] = obj;
+    return obj;
 };
 
 /**
  * Function: GameEngine.onServerTick
  * Arguments: None
+ * Returns: Nothing
  */
 GameEngine.prototype.onServerTick = function() {
-    // Broadcast current frame
-    var payload = this.broadcastFrame.toHeartbeat();
+    var events = [];
+    var updates = [];
+
+    // Generate current state
+    for (var objId in this.objects) {
+
+        if (!this.objects.hasOwnProperty(objId)) continue;
+        var obj = this.objects[objId];
+
+        if (obj.dirty) {
+            updates.push(obj.toGameObjUpdate(this));
+            Array.prototype.push.apply(events, obj.registeredEvents);
+            obj.dirty = false;
+            // TODO: obj.processEvents();
+        }
+    }
+
     var message = new this.proto.Message({
-        Tick: this.tick,
-        GameHeartbeat: payload
+        GameHeartbeat: {
+            SyncTick: this.tick,
+            Events: events,
+            Updates: updates
+        }
     });
+
+    // Transmit heartbeat to clients
     var byteBuffer = message.encode();
     this.wss.broadcast(byteBuffer.toBuffer(),
         { binary: true, mask: false });
 
     // Move to next frame
     ++this.tick;
-    this.frames[this.tick % this.frameLookbackLength] =
-        new GameFrame(this.tick);
-    this.broadcastFrame = new GameFrame(this.tick);
-};
-
-/**
- * Function: GameEngine.addNewPlayer
- * Arguments:
- *      1. newPlayer: impl of 'Player' obj
- */
-GameEngine.prototype.addNewPlayer = function(player) {
-    // TODO: Check for max players
-    this.objects[player.id] = player;
-    ++this.playerCount;
-};
-
-/**
- * Function: GameEngine.removePlayer
- * Arguments:
- *      1. player: impl of 'Player' obj to be removed
- */
-GameEngine.prototype.removePlayer = function(player) {
-    // TODO: Remove possible player updates, send notification
-    delete this.objects[player.id];
-    --this.playerCount;
 };
 
 /**
@@ -255,18 +321,21 @@ GameEngine.prototype.onClientConnect = function(ws) {
 
     // Get current state info
     var lastTick = this.tick - 1;
-    var lastState = undefined; // TODO
+    var lastStates = [];
+
+    this.objects.forEach(function(obj) {
+        lastStates.push(obj.toGameObjStateExt(this));
+    }.bind(this));
 
     // Create new game state message
     var gameState = new this.proto.GameState({
         SyncTick: lastTick,
-        ObjStates: lastState,
+        ObjStates: lastStates,
         ServerInfo: this.cache.serverInfo
     });
 
     // Encapsulate in message
     var message = new this.proto.Message({
-        Tick: this.tick,
         GameState: gameState
     });
 
@@ -281,12 +350,13 @@ GameEngine.prototype.onClientConnect = function(ws) {
  *      1. data: client data packet
  * Returns: Nothing
  */
-GameEngine.prototype.onClientMessage = function(data, flags) {
+GameEngine.prototype.onClientMessage = function(ws, data, flags) {
     // Check for binary and correct format
     if (flags.binary) {
         try {
             // Convert from binary to Message type
             var message = this.proto.Message.decode(data);
+
         } catch (err) {
             logger.warn('Could not decode client message.');
             return;
@@ -296,21 +366,43 @@ GameEngine.prototype.onClientMessage = function(data, flags) {
         return;
     }
 
-    // Find related frame
-    var frame = this.getFrame(message.Tick);
-    if (frame === null) {
-        logger.verbose('Client message is out of frame lookback bounds.');
-        return;
-    }
+    // TODO: Check tick bounds
 
     // Process payload
     switch (message.Payload) {
         case 'GameEvent':
-            this.addEventToFrame(frame, message.GameEvent);
+            var eventObjId = message.GameEvent.TargetObjId;
+
+            if (eventObjId in this.objects) {
+                this.objects[eventObjId].update(message.GameEvent);
+
+            } else if (message.GameEvent.Payload === 'CreateObject') {
+
+                // Create new object
+                this.createObjectFromEvent(message.GameEvent);
+
+                // Send updated event back to client
+                var byteBuffer = message.encode();
+                ws.send(byteBuffer.toBuffer(), { binary: true, mask: false });
+
+            } else {
+                logger.warn('Invalid ObjectId sent in GameEvent: %s.',
+                    eventObjId);
+            }
             break;
+
         case 'GameObjUpdate':
-            this.addObjUpdateToFrame(frame, message.GameObjUpdate);
+            var objUpdateId = message.GameObjUpdate.ObjId;
+
+            if (objUpdateId in this.objects) {
+                this.objects[objUpdateId].update(message.GameObjUpdate);
+
+            } else {
+                logger.warn('Invalid ObjectId sent in GameObjUpdate: %s.',
+                    objUpdateId);
+            }
             break;
+
         default:
             logger.warn('Client message contains server-restricted' +
                 'or unavailable message type.');
@@ -325,7 +417,7 @@ GameEngine.prototype.onClientMessage = function(data, flags) {
  *      2. reason: WS close reason string
  * Returns: Nothing
  */
-GameEngine.prototype.onClientDisconnect = function(code, reason) {
+GameEngine.prototype.onClientDisconnect = function(ws, code, reason) {
     logger.debug('Client closed a connection: [%d] %s', code, reason);
 };
 
@@ -335,7 +427,7 @@ GameEngine.prototype.onClientDisconnect = function(code, reason) {
  *      1. error: client error
  * Returns: Nothing
  */
-GameEngine.prototype.handleSocketError = function(error) {
+GameEngine.prototype.handleSocketError = function(ws, error) {
     logger.warn('WebSocket error: %s', error.data);
     // TODO: Remove players with fatal errors
 };
