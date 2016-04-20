@@ -13,12 +13,12 @@ var t;
 
     var ProtoBuf = dcodeIO.ProtoBuf;
     var protobuilder = ProtoBuf.newBuilder();
-    ProtoBuf.loadProtoFile('./proto/GameEvent.proto', protobuilder);
-    ProtoBuf.loadProtoFile("./proto/GameHeartbeat.proto", protobuilder);
-    ProtoBuf.loadProtoFile("./proto/GameObject.proto", protobuilder);
-    ProtoBuf.loadProtoFile("./proto/GameState.proto", protobuilder);
-    ProtoBuf.loadProtoFile("./proto/Message.proto", protobuilder);
-    ProtoBuf.loadProtoFile("./proto/ServerInfo.proto", protobuilder);
+    ProtoBuf.loadProtoFile('proto/GameEvent.proto', protobuilder);
+    ProtoBuf.loadProtoFile("proto/GameHeartbeat.proto", protobuilder);
+    ProtoBuf.loadProtoFile("proto/GameObject.proto", protobuilder);
+    ProtoBuf.loadProtoFile("proto/GameState.proto", protobuilder);
+    ProtoBuf.loadProtoFile("proto/Message.proto", protobuilder);
+    ProtoBuf.loadProtoFile("proto/ServerInfo.proto", protobuilder);
     var protoroot = protobuilder.build();
 
     var socket = new WebSocket("ws://srv01.test.sc.plecki.net:8080");
