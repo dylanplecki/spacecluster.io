@@ -19,7 +19,7 @@ var t;
     ProtoBuf.loadProtoFile("proto/ServerInfo.proto", protobuilder);
     var protoroot = protobuilder.build().spacecluster;
 
-    var socket = new WebSocket("ws://srv01.test.sc.plecki.net:8080");
+    var socket = new WebSocket("ws://" + location.hostname + (location.port ? ':' + location.port : ''));
     socket.binaryType = "arraybuffer";
 
     // TPS logging
