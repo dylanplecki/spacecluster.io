@@ -22,7 +22,7 @@ engine.initialize(wss, config);
 var port = config.get('server.port');
 
 app.serveFile = function(url, response) {
-    var uri = url.parse(request.url).pathname,
+    var uri = url.parse(url).pathname,
         filename = path.join(process.cwd(), uri);
 
     path.exists(filename, function(exists) {
