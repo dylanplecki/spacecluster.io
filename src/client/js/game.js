@@ -2,9 +2,7 @@ var serverInfo;
 tree = new BinTree(function (a, b) {
     return a.id - b.id
 });
-//main = 
-//    new GameObj(Math.floor((Math.random() * 1000) + 1), 100, 100, 50, 2, 100, "dude", "main",
-//    '#' + Math.floor(Math.random() * 16777215).toString(16));
+main = new GameObj(Math.floor((Math.random() * 1000) + 1), 100, 100, 50, 2, 100, "dude", "main", '#' + Math.floor(Math.random() * 16777215).toString(16));
 var t;
 
 (function () {
@@ -19,7 +17,7 @@ var t;
     ProtoBuf.loadProtoFile("proto/GameState.proto", protobuilder);
     ProtoBuf.loadProtoFile("proto/Message.proto", protobuilder);
     ProtoBuf.loadProtoFile("proto/ServerInfo.proto", protobuilder);
-    var protoroot = protobuilder.build();
+    var protoroot = protobuilder.build().spacecluster;
 
     var socket = new WebSocket("ws://srv01.test.sc.plecki.net:8080");
     socket.binaryType = "arraybuffer";
@@ -50,7 +48,8 @@ var t;
     };
 
     socket.onmessage = function (evt) {
-        try {
+        //try {
+
             var msg = protoroot.Message.decode(evt.data),
                 which = msg.Payload;
             if (which == null) throw "ERROR";
@@ -58,6 +57,7 @@ var t;
             t = msg.Tick;
             switch (which) {
                 case 'GameState':
+                    console.log(msg.GameState);
                     serverInfo = msg.GameState.ServerInfo;
                     break;
 
@@ -160,11 +160,11 @@ var t;
                 GameObjUpdate: ObjUpdate
             });
             var new_msg = message.encode();
-            send(new_msg);
+            //send(new_msg);
 
-        } catch (err) {
-            console.log(err);
-        }
+        //} //catch (err) {
+          //  console.log(err);
+        //}
 
     };
 })();
