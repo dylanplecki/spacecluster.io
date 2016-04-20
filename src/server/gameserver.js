@@ -84,7 +84,6 @@ function GameEngine() {
     this.tick = 0;
     this.playerCount = 0;
     this.params = {};
-    this.cache = {};
     this.objects = {};
 }
 
@@ -165,22 +164,6 @@ GameEngine.prototype.initialize = function(wss, config) {
 
     // Initialize tick broadcast mechanism
     this.tickTimer = setInterval(this.onServerTick.bind(this), this.params.frameTime);
-
-    // Build server info
-    this.cache.serverInfo = new this.proto.ServerInfo({
-        ServerId: this.id,
-        ServerName: this.params.serverName,
-        ServerRegion: this.params.serverRegion,
-        MaxPlayers: this.params.maxPlayers,
-        PlayerCount: this.params.playerCount,
-        TickRate: this.params.tickRate,
-        FrameLookbackLength: this.params.frameLookbackLength,
-        PlayerKickTimeout: this.params.playerKickTimeout,
-        LatCoordinate: this.params.location.latitude,
-        LongCoordinate: this.params.location.longitude,
-        LatSize: this.params.location.lat_length,
-        LongSize: this.params.location.long_length
-    });
 
     this.initialized = true;
     logger.info('GameEngine {' + this.id + '} Initialized');
@@ -323,15 +306,29 @@ GameEngine.prototype.onClientConnect = function(ws) {
     var lastTick = this.tick - 1;
     var lastStates = [];
 
-    this.objects.forEach(function(obj) {
-        lastStates.push(obj.toGameObjStateExt(this));
-    }.bind(this));
+    for (var objId in this.objects) {
+        if (!this.objects.hasOwnProperty(objId)) continue;
+        lastStates.push(this.objects[objId].toGameObjStateExt(this));
+    }
 
     // Create new game state message
     var gameState = new this.proto.GameState({
         SyncTick: lastTick,
         ObjStates: lastStates,
-        ServerInfo: this.cache.serverInfo
+        ServerInfo: {
+            ServerId: this.id,
+            ServerName: this.params.serverName,
+            ServerRegion: this.params.serverRegion,
+            MaxPlayers: this.params.maxPlayers,
+            PlayerCount: this.playerCount,
+            TickRate: this.params.tickRate,
+            FrameLookbackLength: this.params.frameLookbackLength,
+            PlayerKickTimeout: this.params.playerKickTimeout,
+            LatCoordinate: this.params.location.latitude,
+            LongCoordinate: this.params.location.longitude,
+            LatSize: this.params.location.lat_length,
+            LongSize: this.params.location.long_length
+        }
     });
 
     // Encapsulate in message

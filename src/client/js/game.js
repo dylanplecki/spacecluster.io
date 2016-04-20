@@ -151,7 +151,7 @@ var t;
                 main.azimuth
             );
             var ObjUpdate = new protoroot.GameObjUpdate(
-                main.id.toString(),
+                main.id,
                 ObjState
             );
 
