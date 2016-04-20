@@ -84,7 +84,6 @@ function GameEngine() {
     this.tick = 0;
     this.playerCount = 0;
     this.params = {};
-    this.proto = {};
     this.cache = {};
     this.objects = {};
 }
@@ -109,14 +108,14 @@ GameEngine.prototype.initialize = function(wss, config) {
     this.wss = wss;
 
     // Load the ProtoBuf
-    this.proto.builder = ProtoBuf.newBuilder();
-    ProtoBuf.loadProtoFile('proto/Common.proto', this.proto.builder);
-    ProtoBuf.loadProtoFile('proto/GameEvent.proto', this.proto.builder);
-    ProtoBuf.loadProtoFile('proto/GameHeartbeat.proto', this.proto.builder);
-    ProtoBuf.loadProtoFile('proto/GameObject.proto', this.proto.builder);
-    ProtoBuf.loadProtoFile('proto/Message.proto', this.proto.builder);
-    ProtoBuf.loadProtoFile('proto/ServerInfo.proto', this.proto.builder);
-    this.proto = this.proto.builder.build();
+    var protoBuilder = ProtoBuf.newBuilder();
+    ProtoBuf.loadProtoFile('proto/GameEvent.proto', protoBuilder);
+    ProtoBuf.loadProtoFile('proto/GameHeartbeat.proto', protoBuilder);
+    ProtoBuf.loadProtoFile('proto/GameObject.proto', protoBuilder);
+    ProtoBuf.loadProtoFile('proto/GameState.proto', protoBuilder);
+    ProtoBuf.loadProtoFile('proto/Message.proto', protoBuilder);
+    ProtoBuf.loadProtoFile('proto/ServerInfo.proto', protoBuilder);
+    this.proto = protoBuilder.build().spacecluster;
 
     // Get engine config options
     this.params.tickRate = config.get('game_engine.tick_rate');
@@ -165,7 +164,7 @@ GameEngine.prototype.initialize = function(wss, config) {
     };
 
     // Initialize tick broadcast mechanism
-    this.tickTimer = setInterval(this.onServerTick, this.params.frameTime);
+    this.tickTimer = setInterval(this.onServerTick.bind(this), this.params.frameTime);
 
     // Build server info
     this.cache.serverInfo = new this.proto.ServerInfo({
@@ -249,7 +248,6 @@ GameEngine.prototype.createObjectFromEvent = function(gameCreateEvent) {
     gameCreateEvent.CreateObject.InitialState.Velocity = 0;
     gameCreateEvent.CreateObject.InitialState.Azimuth = 0;
     gameCreateEvent.CreateObject.InitialState.Size = this.params.initialPlayerSize;
-    // TODO: Create at random position / initial size
 
     // Create new game object and add to game engine
     var obj = GameObj(
@@ -282,14 +280,18 @@ GameEngine.prototype.onServerTick = function() {
     var updates = [];
 
     // Generate current state
-    this.objects.forEach(function(obj) {
+    for (var objId in this.objects) {
+
+        if (!this.objects.hasOwnProperty(objId)) continue;
+        var obj = this.objects[objId];
+
         if (obj.dirty) {
             updates.push(obj.toGameObjUpdate(this));
             Array.prototype.push.apply(events, obj.registeredEvents);
             obj.dirty = false;
             // TODO: obj.processEvents();
         }
-    }.bind(this));
+    }
 
     var message = new this.proto.Message({
         GameHeartbeat: {
