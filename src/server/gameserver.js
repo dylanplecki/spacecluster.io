@@ -24,10 +24,11 @@ function GameObject(id, type, x, y, vel, azi, size,
     this.isPlayer = type === "player";
     this.lastUpdatedTick = -1;
     this.dirty = false;
-    this.registeredEvents = [];
+    this.markForDelete = false;
+    this.hidden = false;
+    this.lastUpdatedHrTime = process.hrtime();
 
     this.update = function(gameObjUpdate) {
-        // TODO: Validate object update
         this.lastUpdatedTick = gameObjUpdate.Tick;
         this.dirty = true; // TODO: Check for change
         this.xPos = gameObjUpdate.ObjState.XPos;
@@ -37,11 +38,6 @@ function GameObject(id, type, x, y, vel, azi, size,
         this.azimuth = gameObjUpdate.ObjState.Azimuth;
     };
 
-    this.registerEvent = function(gameEvent) {
-        // TODO: Validate event
-        this.dirty = true;
-        this.registeredEvents.push(gameEvent);
-    };
     this.toGameObjState = function(gameEngine) {
         return new gameEngine.proto.GameObjState({
             XPos: this.xPos,
@@ -85,6 +81,7 @@ function GameEngine() {
     this.playerCount = 0;
     this.params = {};
     this.objects = {};
+    this.events = [];
 }
 
 /**
@@ -158,7 +155,11 @@ GameEngine.prototype.initialize = function(wss, config) {
 
     this.wss.broadcast = function(data, flags) {
         wss.clients.forEach(function(client) {
-            client.send(data, flags);
+            if (client.readyState === client.OPEN) {
+                client.send(data, flags);
+            } else {
+                // TODO: Logging
+            }
         });
     };
 
@@ -184,7 +185,9 @@ GameEngine.prototype.shutdown = function() {
     var engineId = this.id;
     logger.info('GameEngine {' + engineId + '} Shutting Down...');
 
-    // TODO: Gracefully shutdown
+    // TODO: Gracefully shutdown everything
+    clearInterval(this.tickTimer);
+    this.wss.close();
 
     logger.info('GameEngine {' + engineId + '} Shut Down');
     return true;
@@ -218,39 +221,69 @@ GameEngine.prototype.createObjectFromEvent = function(gameCreateEvent) {
     // TODO: Validate creation
     if (!gameCreateEvent.CreateObject) return null;
 
+    var obj = this.createObjectFromEventPayload(gameCreateEvent.CreateObject);
+
+    gameCreateEvent.TargetObjId = obj.id;
+    obj.lastUpdatedTick = gameCreateEvent.Tick;
+    this.addEvent(gameCreateEvent, null, obj);
+};
+
+/**
+ * Function: GameEngine.createObjectFromEventPayload
+ * Arguments:
+ *  1. eventCreatePayload: payload CreateObject from GameEvent
+ * Returns: New object (GameObject)
+ */
+GameEngine.prototype.createObjectFromEventPayload = function(eventCreatePayload) {
+    // TODO: Validate creation
+    if (!eventCreatePayload) return null;
+
     var randomCentralPos = function(minPos, maxPos, radius) {
         return minPos + ((maxPos - minPos) / 2) - radius + (Math.random() * radius * 2);
     };
 
     // Generate creation data for game event
-    gameCreateEvent.TargetObjId = this.generateUid();
-    gameCreateEvent.CreateObject.InitialState.XPos =
+    eventCreatePayload.InitialState.XPos =
         randomCentralPos(0, this.params.location.latitude, this.params.playerStartRadius);
-    gameCreateEvent.CreateObject.InitialState.YPos =
+    eventCreatePayload.InitialState.YPos =
         randomCentralPos(0, this.params.location.longitude, this.params.playerStartRadius);
-    gameCreateEvent.CreateObject.InitialState.Velocity = 0;
-    gameCreateEvent.CreateObject.InitialState.Azimuth = 0;
-    gameCreateEvent.CreateObject.InitialState.Size = this.params.initialPlayerSize;
+    eventCreatePayload.InitialState.Velocity = 0;
+    eventCreatePayload.InitialState.Azimuth = 0;
+    eventCreatePayload.InitialState.Size = this.params.initialPlayerSize;
 
     // Create new game object and add to game engine
     var obj = GameObj(
-        gameCreateEvent.TargetObjId, // ID
-        gameCreateEvent.CreateObject.ObjType, // Type
-        gameCreateEvent.CreateObject.InitialState.XPos, // X pos
-        gameCreateEvent.CreateObject.InitialState.YPos, // Y pos
-        gameCreateEvent.CreateObject.InitialState.Velocity, // Velocity
-        gameCreateEvent.CreateObject.InitialState.Azimuth, // Azimuth
-        gameCreateEvent.CreateObject.InitialState.Size, // Size
-        gameCreateEvent.CreateObject.ObjTheme, // Theme
-        gameCreateEvent.CreateObject.Description // Description
+        this.generateUid(), // ID
+        eventCreatePayload.ObjType, // Type
+        eventCreatePayload.InitialState.XPos, // X pos
+        eventCreatePayload.InitialState.YPos, // Y pos
+        eventCreatePayload.InitialState.Velocity, // Velocity
+        eventCreatePayload.InitialState.Azimuth, // Azimuth
+        eventCreatePayload.InitialState.Size, // Size
+        eventCreatePayload.ObjTheme, // Theme
+        eventCreatePayload.Description // Description
     );
 
-    obj.dirty = true; // Done again in registerEvent
-    obj.lastUpdatedTick = gameCreateEvent.Tick;
-    obj.registerEvent(gameCreateEvent);
-
+    obj.dirty = true;
     this.objects[obj.id] = obj;
     return obj;
+};
+
+/**
+ * Function: GameEngine.addEvent
+ * Arguments:
+ *  1. gameEvent: GameEvent to add
+ *  2. iniObject: initiator object reference (Optional)
+ *  3. tgtObject: target object reference (Optional)
+ * Returns: Nothing
+ */
+GameEngine.prototype.addEvent = function(gameEvent, iniObject, tgtObject) {
+    gameEvent.InitObj = iniObject;
+    gameEvent.TargetObj = tgtObject;
+
+    // TODO: Validate event
+
+    this.events.push(gameEvent);
 };
 
 /**
@@ -259,27 +292,32 @@ GameEngine.prototype.createObjectFromEvent = function(gameCreateEvent) {
  * Returns: Nothing
  */
 GameEngine.prototype.onServerTick = function() {
-    var events = [];
+    var obj;
+    var objId;
     var updates = [];
 
+    // Run pre-tick-processors
+    this.processEvents();
+    this.generateFood();
+
     // Generate current state
-    for (var objId in this.objects) {
+    for (objId in this.objects) {
 
         if (!this.objects.hasOwnProperty(objId)) continue;
-        var obj = this.objects[objId];
+        obj = this.objects[objId];
 
-        if (obj.dirty) {
+        if (obj.markForDelete) {
+            delete this.objects[objId];
+        } else if (!obj.hidden && obj.dirty) {
             updates.push(obj.toGameObjUpdate(this));
-            Array.prototype.push.apply(events, obj.registeredEvents);
             obj.dirty = false;
-            // TODO: obj.processEvents();
         }
     }
 
     var message = new this.proto.Message({
         GameHeartbeat: {
             SyncTick: this.tick,
-            Events: events,
+            Events: this.events,
             Updates: updates
         }
     });
@@ -291,6 +329,82 @@ GameEngine.prototype.onServerTick = function() {
 
     // Move to next frame
     ++this.tick;
+    this.events = [];
+};
+
+/**
+ * Function: GameEngine.processEvents
+ * Arguments:
+ *  1. eventList - list of registered events
+ * Returns: Nothing
+ */
+GameEngine.prototype.processEvents = function() {
+    var eventId, event, initiator, target, appendEvents = [];
+
+    for (eventId in this.events) {
+        if (!this.events.hasOwnProperty(eventId)) continue;
+        event = this.events[eventId];
+
+        if (event.InitObj) {
+            initiator = event.InitObj;
+        } else if (event.InitObjId > 0 && event.InitObjId in this.objects) {
+            initiator = this.objects[event.InitObjId];
+        } else {
+            initiator = null;
+        }
+
+        if (event.TargetObj) {
+            target = event.TargetObj;
+        } else if (event.TargetObjId > 0 && event.TargetObjId in this.objects) {
+            target = this.objects[event.TargetObjId];
+        } else {
+            target = null;
+        }
+
+        switch (event.Payload) {
+            case 'ObjectDestroyed':
+                assert(target);
+                target.lastUpdatedHrTime = process.hrtime();
+
+                if (target.type === 'food') {
+                    target.hidden = true;
+                } else {
+                    target.markForDelete = true;
+                }
+
+                if (initiator) {
+                    initiator.size += target.size;
+                }
+                break;
+
+            case 'ObjectSplit':
+                assert(target);
+
+                for (var child in event.ObjectSplit.CreatedObjects) {
+                    if (!event.ObjectSplit.CreatedObjects.hasOwnProperty(child)) continue;
+                    this.createObjectFromEventPayload(child);
+                }
+
+                break;
+
+            case 'CreateObject':
+            default:
+                // Do nothing
+        }
+    }
+
+    if (appendEvents.length > 0) {
+        Array.prototype.push.apply(this.events, appendEvents);
+    }
+};
+
+/**
+ * Function: GameEngine.generateFood
+ * Arguments: None
+ * Returns: Nothing
+ */
+GameEngine.prototype.generateFood = function() {
+    // TODO
 };
 
 /**
@@ -300,15 +414,20 @@ GameEngine.prototype.onServerTick = function() {
  * Returns: Nothing
  */
 GameEngine.prototype.onClientConnect = function(ws) {
+    var obj, objId;
     logger.debug('New client connected to server');
 
     // Get current state info
     var lastTick = this.tick - 1;
     var lastStates = [];
 
-    for (var objId in this.objects) {
+    for (objId in this.objects) {
         if (!this.objects.hasOwnProperty(objId)) continue;
-        lastStates.push(this.objects[objId].toGameObjStateExt(this));
+        obj = this.objects[objId];
+
+        if (!obj.hidden) {
+            lastStates.push(obj.toGameObjStateExt(this));
+        }
     }
 
     // Create new game state message
@@ -371,7 +490,7 @@ GameEngine.prototype.onClientMessage = function(ws, data, flags) {
             var eventObjId = message.GameEvent.TargetObjId;
 
             if (eventObjId in this.objects) {
-                this.objects[eventObjId].update(message.GameEvent);
+                this.addEvent(message.GameEvent, null, null);
 
             } else if (message.GameEvent.Payload === 'CreateObject') {
 
@@ -392,6 +511,7 @@ GameEngine.prototype.onClientMessage = function(ws, data, flags) {
             var objUpdateId = message.GameObjUpdate.ObjId;
 
             if (objUpdateId in this.objects) {
+                // TODO: Validate update
                 this.objects[objUpdateId].update(message.GameObjUpdate);
 
             } else {
@@ -416,6 +536,7 @@ GameEngine.prototype.onClientMessage = function(ws, data, flags) {
  */
 GameEngine.prototype.onClientDisconnect = function(ws, code, reason) {
     logger.debug('Client closed a connection: [%d] %s', code, reason);
+    // TODO: Remove players who didn't send playerLeft event
 };
 
 /**

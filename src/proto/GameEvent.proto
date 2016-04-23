@@ -9,22 +9,15 @@ message GameEvent {
 	required uint64 InitObjId = 3; // Event initiator, 0 = server
 	required uint64 TargetObjId = 4; // Event target, 0 = server
 	oneof Payload {
-		ObjectAbsorbedPayload ObjectAbsorbed = 7;
-		ObjectDestroyedPayload ObjectDestroyed = 8;
-		ObjectSplitPayload ObjectSplit = 9;
-		CreateObjectPayload CreateObject = 10;
+		ObjectDestroyedPayload ObjectDestroyed = 5;
+		ObjectSplitPayload ObjectSplit = 6;
+		CreateObjectPayload CreateObject = 7;
 	}
 }
 
-message ObjectAbsorbedPayload {
-	// InitObjId = Absorber (or server, equiv. to destroy)
-	// TargetObjId = Absorbed
-	required uint32 NewInitSize = 1;
-}
-
 message ObjectDestroyedPayload {
-	// InitObjId = Destroyer (or server)
-	// TargetObjId = Destroyed
+	// InitObjId = Destroyer (or server) (or absorber)
+	// TargetObjId = Destroyed (or absorbed)
 	optional string DestroyReason = 1;
 }
 
