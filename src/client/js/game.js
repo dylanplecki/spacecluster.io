@@ -188,9 +188,11 @@ var t = 0;
                     break;
 
                 case 'GameEvent':
+                    var event = msg.GameEvent;
+
                     console.log(event.CreateObject.InitialState.XPos);
                     console.log(event.CreateObject.InitialState.YPos);
-                    var event = msg.GameEvent;
+                    
                     main = new GameObj(
                         event.TargetObjId,
                         event.CreateObject.InitialState.XPos,
