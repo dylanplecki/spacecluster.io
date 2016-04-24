@@ -151,8 +151,8 @@ var t = 0;
                         var update = updates[i];
                         var state = update.ObjState;
                         var obj = {
-                            id: event.TargetObjId,
-                        }
+                            id: update.ObjId
+                        };
                         if (obj.id == main.id) break;
                         var node = tree.find(obj);
                         if (node == null) {
