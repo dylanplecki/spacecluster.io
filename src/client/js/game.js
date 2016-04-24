@@ -2,7 +2,7 @@ var serverInfo;
 tree = new BinTree(function (a, b) {
     return a.id - b.id
 });
-main = new GameObj(Math.floor((Math.random() * 1000) + 1), 100, 100, 50, 2, 100, "dude", "main", '#' + Math.floor(Math.random() * 16777215).toString(16), 0);
+//main = new GameObj(Math.floor((Math.random() * 1000) + 1), 100, 100, 50, 2, 100, "dude", "main", '#' + Math.floor(Math.random() * 16777215).toString(16), 0);
 var t = 0;
 
 (function () {
@@ -166,11 +166,30 @@ var t = 0;
                             node.azimuth = obj.azimuth;
                         }
                     }
+                    var ObjState = new protoroot.GameObjState(
+                        main.x,
+                        main.y,
+                        main.size,
+                        main.velocity,
+                        main.azimuth
+                    );
+                    var ObjUpdate = new protoroot.GameObjUpdate({
+                        Tick: t+1,
+                        ObjId: main.id,
+                        ObjState: ObjState
+                    });
+
+                    var message = new protoroot.Message({
+                        GameObjUpdate: ObjUpdate
+                    });
+                    var new_msg = message.encode();
+                    send(new_msg);
                     //console.log(obj);
                     break;
 
                 case 'GameEvent':
-                    console.log("yee");
+                    console.log(event.CreateObject.InitialState.XPos);
+                    console.log(event.CreateObject.InitialState.YPos);
                     var event = msg.GameEvent;
                     main = new GameObj(
                         event.TargetObjId,
@@ -184,29 +203,30 @@ var t = 0;
                         event.CreateObject.ObjTheme,
                         event.Tick
                     );
+                    var ObjState = new protoroot.GameObjState(
+                        main.x,
+                        main.y,
+                        main.size,
+                        main.velocity,
+                        main.azimuth
+                    );
+                    var ObjUpdate = new protoroot.GameObjUpdate({
+                        Tick: t+1,
+                        ObjId: main.id,
+                        ObjState: ObjState
+                    });
+
+                    var message = new protoroot.Message({
+                        GameObjUpdate: ObjUpdate
+                    });
+                    var new_msg = message.encode();
+                    send(new_msg);
                     break;
 
                 default:
                     break;
             }
-            var ObjState = new protoroot.GameObjState(
-                main.x,
-                main.y,
-                main.size,
-                main.velocity,
-                main.azimuth
-            );
-            var ObjUpdate = new protoroot.GameObjUpdate({
-                Tick: t+1,
-                ObjId: main.id,
-                ObjState: ObjState
-            });
 
-            var message = new protoroot.Message({
-                GameObjUpdate: ObjUpdate
-            });
-            var new_msg = message.encode();
-            send(new_msg);
 
         } catch (err) {
             console.log(err);
