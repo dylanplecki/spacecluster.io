@@ -146,6 +146,8 @@ GameEngine.prototype.initialize = function(wss, config) {
         config.get('game_engine.initial_player_size');
     this.params.playerStartRadius =
         config.get('game_engine.player_start_radius');
+    this.params.reportingInterval =
+        config.get('game_engine.reporting_interval');
 
     this.params.location = {};
     this.params.location.latitude = config.get('game_engine.location.latitude');
@@ -186,6 +188,27 @@ GameEngine.prototype.initialize = function(wss, config) {
     // Initialize tick broadcast mechanism
     this.tickTimer = setInterval(this.onServerTick.bind(this), this.params.frameTime);
 
+    if (this.params.reportingInterval > 0) {
+        var reportingLastTick = this.tick;
+        var reportingStart = process.hrtime();
+
+        logger.log('info', 'Starting statistics reporting every %d seconds.',
+            this.params.reportingInterval);
+
+        this.reportingTimer = setInterval(function () {
+            var seconds = (process.hrtime()[0] - reportingStart[0]).toFixed(2);
+
+            // Log statistics
+            logger.log('verbose', 'Average TPS [%d sec]: %s',
+                seconds, ((this.tick - reportingLastTick) / seconds).toFixed(2)
+            );
+
+            // Reset statistics
+            reportingLastTick = this.tick;
+            reportingStart = process.hrtime();
+        }.bind(this), this.params.reportingInterval * 1000);
+    }
+
     this.initialized = true;
     logger.info('GameEngine {' + this.id + '} Initialized');
 };
@@ -206,6 +229,7 @@ GameEngine.prototype.shutdown = function() {
     logger.info('GameEngine {' + engineId + '} Shutting Down...');
 
     // TODO: Gracefully shutdown everything
+    clearInterval(this.reportingTimer);
     clearInterval(this.tickTimer);
     this.wss.close();
 
