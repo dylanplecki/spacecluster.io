@@ -146,13 +146,14 @@ GameEngine.prototype.initialize = function(wss, config) {
         config.get('game_engine.initial_player_size');
     this.params.playerStartRadius =
         config.get('game_engine.player_start_radius');
+    this.params.reportingInterval =
+        config.get('game_engine.reporting_interval');
 
     this.params.location = {};
     this.params.location.latitude = config.get('game_engine.location.latitude');
     this.params.location.longitude = config.get('game_engine.location.longitude');
-    this.params.location.lat_length = config.get('game_engine.location.lat_length');
-    this.params.location.long_length =
-        config.get('game_engine.location.long_length');
+    this.params.location.latLength = config.get('game_engine.location.lat_length');
+    this.params.location.longLength = config.get('game_engine.location.long_length');
 
     // Final engine config initialization
     this.params.frameTime = (1 / this.params.tickRate) * 1000;
@@ -186,6 +187,27 @@ GameEngine.prototype.initialize = function(wss, config) {
     // Initialize tick broadcast mechanism
     this.tickTimer = setInterval(this.onServerTick.bind(this), this.params.frameTime);
 
+    if (this.params.reportingInterval > 0) {
+        var reportingLastTick = this.tick;
+        var reportingStart = process.hrtime();
+
+        logger.log('info', 'Starting statistics reporting every %d seconds.',
+            this.params.reportingInterval);
+
+        this.reportingTimer = setInterval(function () {
+            var seconds = (process.hrtime()[0] - reportingStart[0]).toFixed(2);
+
+            // Log statistics
+            logger.log('verbose', 'Average TPS [%d sec]: %s',
+                seconds, ((this.tick - reportingLastTick) / seconds).toFixed(2)
+            );
+
+            // Reset statistics
+            reportingLastTick = this.tick;
+            reportingStart = process.hrtime();
+        }.bind(this), this.params.reportingInterval * 1000);
+    }
+
     this.initialized = true;
     logger.info('GameEngine {' + this.id + '} Initialized');
 };
@@ -206,6 +228,7 @@ GameEngine.prototype.shutdown = function() {
     logger.info('GameEngine {' + engineId + '} Shutting Down...');
 
     // TODO: Gracefully shutdown everything
+    clearInterval(this.reportingTimer);
     clearInterval(this.tickTimer);
     this.wss.close();
 
@@ -264,9 +287,9 @@ GameEngine.prototype.createObjectFromEventPayload = function(eventCreatePayload)
 
     // Generate creation data for game event
     eventCreatePayload.InitialState.XPos =
-        randomCentralPos(0, this.params.location.latitude, this.params.playerStartRadius);
+        randomCentralPos(0, this.params.location.latLength, this.params.playerStartRadius);
     eventCreatePayload.InitialState.YPos =
-        randomCentralPos(0, this.params.location.longitude, this.params.playerStartRadius);
+        randomCentralPos(0, this.params.location.longLength, this.params.playerStartRadius);
     eventCreatePayload.InitialState.Velocity = 0;
     eventCreatePayload.InitialState.Azimuth = 0;
     eventCreatePayload.InitialState.Size = this.params.initialPlayerSize;
@@ -468,8 +491,8 @@ GameEngine.prototype.onClientConnect = function(ws) {
             PlayerKickTimeout: this.params.playerKickTimeout,
             LatCoordinate: this.params.location.latitude,
             LongCoordinate: this.params.location.longitude,
-            LatSize: this.params.location.lat_length,
-            LongSize: this.params.location.long_length
+            LatSize: this.params.location.latLength,
+            LongSize: this.params.location.longLength
         }
     });
 
