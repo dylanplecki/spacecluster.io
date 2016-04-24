@@ -62,7 +62,7 @@ function GameObject(id, type, x, y, vel, azi, size,
             ObjType: this.type,
             ObjTheme: this.theme,
             Description: this.description,
-            LastUpdateTick: this.lastUpdatedTick,
+            LastUpdatedTick: this.lastUpdatedTick,
             ObjState: this.toGameObjState(gameEngine)
         });
     };
@@ -239,7 +239,7 @@ GameEngine.prototype.createObjectFromEventPayload = function(eventCreatePayload)
     if (!eventCreatePayload) return null;
 
     var randomCentralPos = function(minPos, maxPos, radius) {
-        return minPos + ((maxPos - minPos) / 2) - radius + (Math.random() * radius * 2);
+        return Math.round(minPos + ((maxPos - minPos) / 2) - radius + (Math.random() * radius * 2));
     };
 
     // Generate creation data for game event
@@ -252,7 +252,7 @@ GameEngine.prototype.createObjectFromEventPayload = function(eventCreatePayload)
     eventCreatePayload.InitialState.Size = this.params.initialPlayerSize;
 
     // Create new game object and add to game engine
-    var obj = GameObj(
+    var obj = new GameObject(
         this.generateUid(), // ID
         eventCreatePayload.ObjType, // Type
         eventCreatePayload.InitialState.XPos, // X pos
