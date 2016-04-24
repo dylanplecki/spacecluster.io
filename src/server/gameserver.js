@@ -1,9 +1,29 @@
 ﻿var uuid = require('node-uuid');
 var winston = require('winston');
-var logger = new winston.Logger();
 var ProtoBuf = require('protobufjs');
+var fs = require('fs');
+var path = require('path');
 
 var exports = module.exports = {};
+
+var _logFile = 'logs/server.log';
+var _logDir = path.dirname(_logFile);
+
+if (!fs.existsSync(_logDir)) {
+    fs.mkdirSync(_logDir);
+}
+
+var logger = new (winston.Logger)({
+    transports: [
+        new (winston.transports.Console)({
+            level: 'warn'
+        }),
+        new (require('winston-daily-rotate-file'))({
+            level: 'verbose',
+            filename: _logFile
+        })
+    ]
+});
 
 /*-----------------------*/
 /* Game Data Descriptors */
@@ -388,8 +408,11 @@ GameEngine.prototype.processEvents = function() {
                 break;
 
             case 'CreateObject':
-            default:
                 // Do nothing
+                break;
+
+            default:
+                logger.info('Got invalid event payload.', {payload: event.Payload});
         }
     }
 
@@ -502,8 +525,8 @@ GameEngine.prototype.onClientMessage = function(ws, data, flags) {
                 ws.send(byteBuffer.toBuffer(), { binary: true, mask: false });
 
             } else {
-                logger.warn('Invalid ObjectId sent in GameEvent: %s.',
-                    eventObjId);
+                logger.warn('Invalid ObjectId sent in GameEvent.',
+                    {objectId: eventObjId});
             }
             break;
 
@@ -515,8 +538,8 @@ GameEngine.prototype.onClientMessage = function(ws, data, flags) {
                 this.objects[objUpdateId].update(message.GameObjUpdate);
 
             } else {
-                logger.warn('Invalid ObjectId sent in GameObjUpdate: %s.',
-                    objUpdateId);
+                logger.warn('Invalid ObjectId sent in GameObjUpdate.',
+                    {objectId: objUpdateId});
             }
             break;
 
@@ -535,7 +558,7 @@ GameEngine.prototype.onClientMessage = function(ws, data, flags) {
  * Returns: Nothing
  */
 GameEngine.prototype.onClientDisconnect = function(ws, code, reason) {
-    logger.debug('Client closed a connection: [%d] %s', code, reason);
+    logger.debug('Client closed a connection.', {code: code, reason: reason});
     // TODO: Remove players who didn't send playerLeft event
 };
 
@@ -546,7 +569,7 @@ GameEngine.prototype.onClientDisconnect = function(ws, code, reason) {
  * Returns: Nothing
  */
 GameEngine.prototype.handleSocketError = function(ws, error) {
-    logger.warn('WebSocket error: %s', error.data);
+    logger.warn('WebSocket error.', {error: error.data});
     // TODO: Remove players with fatal errors
 };
 

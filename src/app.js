@@ -13,6 +13,12 @@ var wss = new WebSocketServer({ server: http });
 var engine = new gameserver.GameEngine();
 engine.initialize(wss, config);
 
+process.on('SIGINT', function() {
+    console.log("Caught interrupt signal. Shutting down...");
+    engine.shutdown();
+    process.exit();
+});
+
 /**
  * HTTP Server Code
  */
