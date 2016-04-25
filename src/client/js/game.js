@@ -1,6 +1,6 @@
 var serverInfo;
 tree = new BinTree(function (a, b) {
-    return a.id - b.id
+    return a.id.subtract(b.id);
 });
 //main = new GameObj(Math.floor((Math.random() * 1000) + 1), 100, 100, 50, 2, 100, "dude", "main", '#' + Math.floor(Math.random() * 16777215).toString(16), 0);
 var t = 0;
@@ -153,7 +153,7 @@ var t = 0;
                         var obj = {
                             id: update.ObjId
                         };
-                        if (obj.id == main.id) break;
+                        if (obj.id.compare(main.id) == 0) break;
                         var node = tree.find(obj);
                         if (node == null) {
                             break;
@@ -247,7 +247,7 @@ function GameObj(id, x, y, size, velocity, azimuth, type, name, theme, tick) {
     this.type = type;
     this.description = name;
     this.theme = theme;
-    this.lstTick = tick;
+    this.lastTick = tick;
 
 }
 
