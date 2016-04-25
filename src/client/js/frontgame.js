@@ -11,12 +11,12 @@ var foods = [];
 var target = {x: 0, y: 0};
 var scalar = 1/50
 var gameObjs = [];
-//var main    = new GameObj(5, 100, 100, 50, 2, 100,"dude", "main", "#330000");
-gameObjs[0] = new GameObj(0, 1000, 1000, 10, 4, 270, "player", "ragusauce", "#234094");
-gameObjs[1] = new GameObj(1, 500, 20, 100, 4, 180, "player", "ragusauce2", "#F33023");
-gameObjs[2] = new GameObj(2, 10, 500, 60, 4, 170, "player", "pn", "#DEF8AF");
-gameObjs[3] = new GameObj(3, 800, 900, 60, 4, 360, "player", "dPlecki", "#F324FA"); // PINK
-gameObjs[4] = new GameObj(4, 30, 30, 200, 4, 170, "player", "dooope", "#ABCDEF");  // BLUE
+// //var main    = new GameObj(5, 100, 100, 50, 2, 100,"dude", "main", "#330000");
+// gameObjs[0] = new GameObj(0, 1000, 1000, 10, 4, 270, "player", "ragusauce", "#234094");
+// gameObjs[1] = new GameObj(1, 500, 20, 100, 4, 180, "player", "ragusauce2", "#F33023");
+// gameObjs[2] = new GameObj(2, 10, 500, 60, 4, 170, "player", "pn", "#DEF8AF");
+// gameObjs[3] = new GameObj(3, 800, 900, 60, 4, 360, "player", "dPlecki", "#F324FA"); // PINK
+// gameObjs[4] = new GameObj(4, 30, 30, 200, 4, 170, "player", "dooope", "#ABCDEF");  // BLUE
 
 //DEBUG
 console.log("SCREENWIDTH: " + screenWidth);
@@ -43,8 +43,8 @@ function drawCircle(centerX, centerY, radius, sides) {
 
 function drawFood(food){
     ctx.fillStyle = "#FFFFFF";
-    var y = (food.y) + screenHeight/2 - main.y; // Trnslate so main is in middle
-    var x = (food.x) + screenWidth/2 - main.x;
+    var y = absoluteToRelativeY(food.y); // Trnslate so main is in middle
+    var x = absoulteToRelativeX(food.x);
     
     distance = Math.sqrt( Math.pow(x-screenWidth/2, 2) + Math.pow(y - screenHeight/2, 2));
     if(distance < main.size && food.draw == true)
@@ -81,16 +81,16 @@ function drawgrid() {
      ctx.globalAlpha = 0.15;
      ctx.beginPath();
 
-    for (var x = screenWidth/2 - main.x; x < screenWidth; x += screenHeight / 18) {
+
+    for (var x = absoulteToRelativeX(0) ; x < screenWidth; x += screenHeight / 18) {
         ctx.moveTo(x, 0);
         ctx.lineTo(x, screenHeight);
     }
 
-    for (var y = screenHeight/2 - main.y; y < screenHeight; y += screenHeight / 18) {
+    for (var y = absoluteToRelativeY(0) ; y < screenHeight; y += screenHeight / 18) {
         ctx.moveTo(0, y);
         ctx.lineTo(screenWidth, y);
     }
-
     ctx.stroke();
     ctx.globalAlpha = 1;
 }
@@ -112,7 +112,6 @@ function draw() {
     
     gameObjs.forEach(drawPlayer);
 }
-draw();
 
 function drawPlayer(player) {
     ctx.fillStyle = player.theme;
@@ -122,8 +121,8 @@ function drawPlayer(player) {
         && player.y + player.size > main.y - screenHeight/2
         && player.y - player.size < main.y + screenHeight/2)
     {
-        var y = (player.y) + screenHeight/2 - main.y; // Trnslate so main is in middle
-        var x = (player.x) + screenWidth/2 - main.x; // Translate so main is in middle
+        var y = absoluteToRelativeY(player.y); // Trnslate so main is in middle
+        var x = absoulteToRelativeX(player.x); // Translate so main is in middle
         
         drawCircle(x, y, player.size, 100);
         ctx.fillStyle = "#000000"
@@ -149,6 +148,16 @@ function gameInput(mouse) {
 	}
 }
 
+function absoulteToRelativeX(x)
+{
+    return x + screenWidth/2 - main.x;
+}
+
+function absoluteToRelativeY(y)
+{
+    return y + screenHeight/2 - main.y;
+}
+
 function GameObj(id, x, y, size, velocity, azimuth, type, name, theme) {
 	this.id = id;
 	this.x  = x;
@@ -161,6 +170,12 @@ function GameObj(id, x, y, size, velocity, azimuth, type, name, theme) {
 	this.theme = theme;
 }
 
+function start(){
+   // var image_x = document.getElementById('play');
+    //image_x.parentNode.removeChild(image_x);
+    draw();
+}
+start();
 
 // Needed to have animation frames work on all browsers: Found on github
 (function() {
