@@ -111,7 +111,6 @@ function draw() {
     }
     
     
-    gameObjs.forEach(drawPlayer);
 }
 
 function drawPlayer(player) {
@@ -134,8 +133,10 @@ function drawPlayer(player) {
 function drawMain(player)
 {
     ctx.fillStyle = player.theme;
-    main.x += parseInt(target.x * scalar);
-    main.y += parseInt(target.y * scalar);
+    if ( !(main.x < 0 && target.x < 0))
+        main.x += parseInt(target.x * scalar);
+    if ( !(main.y < 0 && target.y < 0))
+        main.y += parseInt(target.y * scalar);
     drawCircle(screenWidth/2, screenHeight/2, player.size, 100);
     ctx.fillStyle = "#000000"
     ctx.fillText(main.x + " " + main.y, screenWidth/2, screenHeight/2);
