@@ -83,12 +83,12 @@ function drawgrid() {
 
 
     for (var x = absoulteToRelativeX(0) ; x < screenWidth; x += screenHeight / 18) {
-        ctx.moveTo(x, 0);
+        ctx.moveTo(x, absoluteToRelativeY(0));
         ctx.lineTo(x, screenHeight);
     }
 
     for (var y = absoluteToRelativeY(0) ; y < screenHeight; y += screenHeight / 18) {
-        ctx.moveTo(0, y);
+        ctx.moveTo(absoulteToRelativeX(0), y);
         ctx.lineTo(screenWidth, y);
     }
     ctx.stroke();
