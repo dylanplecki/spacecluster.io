@@ -108,7 +108,7 @@ var t = 0;
                     break;
 
                 case 'GameHeartbeat':
-                    //if (settings.log_tps) ++tps;
+                    if (settings.log_tps) ++tps;
                     var events = msg.GameHeartbeat.Events;
                     var eventsLength = events.length;
                     for(var j = 0; j < eventsLength; j++) {
