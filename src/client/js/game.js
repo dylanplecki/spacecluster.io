@@ -5,9 +5,10 @@ tree = new BinTree(function (a, b) {
 //main = new GameObj(Math.floor((Math.random() * 1000) + 1), 100, 100, 50, 2, 100, "dude", "main", '#' + Math.floor(Math.random() * 16777215).toString(16), 0);
 var t = 0;
 
+// For statistics logging
+var stat_tps = 0, stat_fps = 0;
+
 (function () {
-    var tps = 0;
-    var tps_last = Date.now();
 
     var ProtoBuf = dcodeIO.ProtoBuf;
     var protobuilder = ProtoBuf.newBuilder();
@@ -22,15 +23,17 @@ var t = 0;
     var socket = new WebSocket("ws://" + location.hostname + (location.port ? ':' + location.port : ''));
     socket.binaryType = "arraybuffer";
 
-    // TPS logging
+    // Statistics logging
+    var stat_last = Date.now();
     setInterval(function () {
-        if (settings.log_tps) {
-            var time = Date.now() - tps_last;
-            console.log("TPS [%f]: %d", time / 1000, tps);
-            tps_last = Date.now();
-            tps = 0;
+        if (settings.log_statistics) {
+            var time = (Date.now() - stat_last) / 1000;
+            console.log("STAT [%s]: tps=%s, fps=%s", time.toFixed(2),
+                (stat_tps / time).toFixed(2), (stat_fps / time).toFixed(2));
+            stat_last = Date.now();
+            stat_tps = 0; stat_fps = 0;
         }
-    }, 1000);
+    }, settings.logging_interval);
 
     function send(msg) {
         if (socket.readyState == WebSocket.OPEN) {
@@ -108,7 +111,7 @@ var t = 0;
                     break;
 
                 case 'GameHeartbeat':
-                    if (settings.log_tps) ++tps;
+                    if (settings.log_statistics) ++stat_tps;
                     var events = msg.GameHeartbeat.Events;
                     var eventsLength = events.length;
                     for(var j = 0; j < eventsLength; j++) {

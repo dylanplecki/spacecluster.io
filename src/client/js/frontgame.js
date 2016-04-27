@@ -96,6 +96,7 @@ function drawgrid() {
 }
 
 function draw() {
+    if (settings.log_statistics) ++stat_fps; // Declared in game.js
     requestAnimationFrame(draw);
     drawBackground();
     drawgrid();
