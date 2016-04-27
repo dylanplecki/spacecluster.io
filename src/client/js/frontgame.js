@@ -135,8 +135,12 @@ function drawMain(player)
     ctx.fillStyle = player.theme;
     if ( !(main.x < 0 && target.x < 0))
         main.x += parseInt(target.x * scalar);
+    if (main.x < 0)
+        main.x = 0;
     if ( !(main.y < 0 && target.y < 0))
         main.y += parseInt(target.y * scalar);
+    if (main.y < 0)
+        main.y = 0;
     drawCircle(screenWidth/2, screenHeight/2, player.size, 100);
     ctx.fillStyle = "#000000"
     ctx.fillText(main.x + " " + main.y, screenWidth/2, screenHeight/2);
