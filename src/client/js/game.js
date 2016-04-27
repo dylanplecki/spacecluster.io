@@ -23,14 +23,14 @@ var t = 0;
     socket.binaryType = "arraybuffer";
 
     // TPS logging
-    //setInterval(function () {
-    //    if (settings.log_tps) {
-    //        var time = Date.now() - tps_last;
-    //        console.log("TPS [%f]: %d", time / 1000, tps);
-    //        tps_last = Date.now();
-    //        tps = 0;
-
-    //}, 1000);
+    setInterval(function () {
+        if (settings.log_tps) {
+            var time = Date.now() - tps_last;
+            console.log("TPS [%f]: %d", time / 1000, tps);
+            tps_last = Date.now();
+            tps = 0;
+        }
+    }, 1000);
 
     function send(msg) {
         if (socket.readyState == WebSocket.OPEN) {
