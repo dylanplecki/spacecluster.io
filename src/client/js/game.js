@@ -1,7 +1,8 @@
 var serverInfo;
 tree = new BinTree(function (a, b) {
-    return a.id.subtract(b.id);
+    return a.id - b.id;
 });
+
 //main = new GameObj(Math.floor((Math.random() * 1000) + 1), 100, 100, 50, 2, 100, "dude", "main", '#' + Math.floor(Math.random() * 16777215).toString(16), 0);
 var t = 0;
 
@@ -51,7 +52,7 @@ var stat_tps = 0, stat_fps = 0;
     };
 
     socket.onmessage = function (evt) {
-        try {
+        //try {
 
             var msg = protoroot.Message.decode(evt.data),
                 which = msg.Payload;
@@ -59,13 +60,13 @@ var stat_tps = 0, stat_fps = 0;
             var tick = 0;
             switch (which) {
                 case 'GameState':
-                    console.log(msg.GameState);
+                    //console.log(msg.GameState);
                     serverInfo = msg.GameState.ServerInfo;
-                    var t = msg.SyncTick;
+                    var t = msg.SyncTick + 1;
                     var objStatesLength = msg.GameState.ObjStates.length;
                     for(var k = 0; k < objStatesLength; k++) {
                         var newObjState = msg.GameState.ObjStates[k];
-                        var newObj = new GameObj(newObjState.ObjId,
+                        var newObj = new GameObj(newObjState.ObjId.toNumber(),
                                                  newObjState.ObjState.XPos,
                                                  newObjState.ObjState.YPos,
                                                  newObjState.ObjState.Size,
@@ -76,6 +77,7 @@ var stat_tps = 0, stat_fps = 0;
                                                  newObjState.ObjTheme,
                                                  newObjState.LastUpdatedTick);
                         tree.insert(newObj);
+                        game_objects[newObj.id] = newObj;
                     }
 
                     var initState = new protoroot.GameObjState({
@@ -88,13 +90,13 @@ var stat_tps = 0, stat_fps = 0;
 
                     var createdObj = new protoroot.CreateObjectPayload({
                         ObjType: "player",
-                        ObjTheme:  Math.floor(Math.random() * 16777215).toString(16),
+                        ObjTheme:  "#0000FF",
                         Description: "player1",
                         InitialState: initState
                     });
 
                     var gmEvent = new protoroot.GameEvent({
-                        Tick: t+1,
+                        Tick: t,
                         InitObjId: 0,
                         TargetObjId: 0,
                         CreateObject: createdObj
@@ -113,25 +115,28 @@ var stat_tps = 0, stat_fps = 0;
                 case 'GameHeartbeat':
                     if (settings.log_statistics) ++stat_tps;
                     var events = msg.GameHeartbeat.Events;
+                    //console.log(msg.GameHeartbeat);
                     var eventsLength = events.length;
                     for(var j = 0; j < eventsLength; j++) {
                         var event = events[j];
                         var type = events[j].Payload;
                         switch(type) {
-                            case 'ObjectDestroyedPayload':
-                            case 'ObjectAbsorbedPayload':
+                            case 'ObjectDestroyed':
 
                                 var obj = {
-                                    id: event.TargetObjId
+                                    id: event.TargetObjId.toNumber()
                                 };
 
                                 //update to do animation!
                                 tree.remove(obj);
+                                delete game_objects[obj.id];
                                 break;
-                            case 'CreateObjectPayload':
+                            case 'CreateObject':
+                                //console.log("player joined");
+                                //console.log(event.CreateObject)
                                 var createObj = event.CreateObject;
                                 var node = new GameObj(
-                                    createObj.TargetObjId,
+                                    event.TargetObjId.toNumber(),
                                     createObj.InitialState.XPos,
                                     createObj.InitialState.YPos,
                                     createObj.InitialState.Size,
@@ -143,30 +148,45 @@ var stat_tps = 0, stat_fps = 0;
                                     event.Tick
 
                                 );
+                                if (node.id == main.id) {break;}
                                 tree.insert(node);
+                                game_objects[node.id] = node;
                                 break;
                         }
                     }
                     var updates = msg.GameHeartbeat.Updates;
-                    //console.log(updates);
+                    console.log(updates);
                     var updateLength = updates.length;
+                    //console.log(updates);
+                    //console.log(tree);
                     for (var i = 0; i < updateLength; i++) {
                         var update = updates[i];
                         var state = update.ObjState;
                         var obj = {
-                            id: update.ObjId
+                            id: update.ObjId.toNumber(),
+                            x: state.XPos,
+                            y: state.YPos,
+                            size: state.Size,
+                            velocity: state.Velocity,
+                            azimuth: state.Azimuth
                         };
-                        if (obj.id.compare(main.id) == 0) break;
-                        var node = tree.find(obj);
-                        if (node == null) {
-                            break;
+
+                        var temp_node = game_objects[obj.id];
+                        if (obj.id == main.id) {
+                            console.log("same id as main");
+                        } else if (temp_node == null) {
+                            console.log("node is null");
                             //tree.insert(obj)
                         } else {
-                            node.x = obj.x;
-                            node.y = obj.y;
-                            node.size = obj.size;
-                            node.velocity = obj.velocity;
-                            node.azimuth = obj.azimuth;
+                            //console.log(node);
+                            temp_node.x = obj.x;
+                            temp_node.y = obj.y;
+                            temp_node.size = obj.size;
+                            temp_node.velocity = obj.velocity;
+                            temp_node.azimuth = obj.azimuth;
+                            game_objects[obj.id] = temp_node;
+                            console.log(game_objects[temp_node.id].x);
+
                         }
                     }
                     var ObjState = new protoroot.GameObjState(
@@ -193,11 +213,11 @@ var stat_tps = 0, stat_fps = 0;
                 case 'GameEvent':
                     var event = msg.GameEvent;
 
-                    console.log(event.CreateObject.InitialState.XPos);
-                    console.log(event.CreateObject.InitialState.YPos);
+                    //console.log(event.CreateObject.InitialState.XPos);
+                    //console.log(event.CreateObject.InitialState.YPos);
                     
                     main = new GameObj(
-                        event.TargetObjId,
+                        event.TargetObjId.toNumber(),
                         event.CreateObject.InitialState.XPos,
                         event.CreateObject.InitialState.YPos,
                         event.CreateObject.InitialState.Size,
@@ -233,9 +253,9 @@ var stat_tps = 0, stat_fps = 0;
             }
 
 
-        } catch (err) {
-            console.log(err);
-        }
+        //} catch (err) {
+       //    console.log(err);
+       // }
 
     };
 })();

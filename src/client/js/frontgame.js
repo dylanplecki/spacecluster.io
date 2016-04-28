@@ -104,12 +104,17 @@ function draw() {
     drawMain(main);
     
     // ITERATOR FOR TREE
-    var it = tree.iterator(), item;
-    while((item = it.next()) !== null)
-    {
-        drawPlayer(item);
+    //var it = tree.iterator(), item;
+    //while((item = it.next()) !== null)
+    //{
+    //    drawPlayer(item);
+    //}
+    var id;
+    console.log("drawing");
+    for(id in game_objects) {
+        if (!game_objects.hasOwnProperty(id)) continue;
+        drawPlayer(game_objects[id]);
     }
-    
     
 }
 
