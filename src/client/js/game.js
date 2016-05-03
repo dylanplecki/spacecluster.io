@@ -4,7 +4,7 @@ tree = new BinTree(function (a, b) {
 });
 
 //main = new GameObj(Math.floor((Math.random() * 1000) + 1), 100, 100, 50, 2, 100, "dude", "main", '#' + Math.floor(Math.random() * 16777215).toString(16), 0);
-var t = 0;
+
 
 // For statistics logging
 var stat_tps = 0, stat_fps = 0;
@@ -52,17 +52,17 @@ var stat_tps = 0, stat_fps = 0;
     };
 
     socket.onmessage = function (evt) {
-        //try {
+        try {
 
             var msg = protoroot.Message.decode(evt.data),
                 which = msg.Payload;
             if (which == null) throw "ERROR";
-            var tick = 0;
+            //var tick = 0;
             switch (which) {
                 case 'GameState':
                     //console.log(msg.GameState);
                     serverInfo = msg.GameState.ServerInfo;
-                    var t = msg.SyncTick + 1;
+                    currentTick = msg.SyncTick + 1;
                     var objStatesLength = msg.GameState.ObjStates.length;
                     for(var k = 0; k < objStatesLength; k++) {
                         var newObjState = msg.GameState.ObjStates[k];
@@ -90,13 +90,13 @@ var stat_tps = 0, stat_fps = 0;
 
                     var createdObj = new protoroot.CreateObjectPayload({
                         ObjType: "player",
-                        ObjTheme:  "#0000FF",
+                        ObjTheme:  "#00FFFF",
                         Description: "player1",
                         InitialState: initState
                     });
 
                     var gmEvent = new protoroot.GameEvent({
-                        Tick: t,
+                        Tick: currentTick,
                         InitObjId: 0,
                         TargetObjId: 0,
                         CreateObject: createdObj
@@ -116,6 +116,7 @@ var stat_tps = 0, stat_fps = 0;
                     if (settings.log_statistics) ++stat_tps;
                     var events = msg.GameHeartbeat.Events;
                     //console.log(msg.GameHeartbeat);
+                    currentTick = msg.GameHeartbeat.SyncTick + 1;
                     var eventsLength = events.length;
                     for(var j = 0; j < eventsLength; j++) {
                         var event = events[j];
@@ -197,7 +198,7 @@ var stat_tps = 0, stat_fps = 0;
                         main.azimuth
                     );
                     var ObjUpdate = new protoroot.GameObjUpdate({
-                        Tick: t+1,
+                        Tick: currentTick+1,
                         ObjId: main.id,
                         ObjState: ObjState
                     });
@@ -236,7 +237,7 @@ var stat_tps = 0, stat_fps = 0;
                         main.azimuth
                     );
                     var ObjUpdate = new protoroot.GameObjUpdate({
-                        Tick: t+1,
+                        Tick: currentTick,
                         ObjId: main.id,
                         ObjState: ObjState
                     });
@@ -251,11 +252,30 @@ var stat_tps = 0, stat_fps = 0;
                 default:
                     break;
             }
+            for(var m = 0; m < peopleEaten.length; m++) {
 
+                var eatenObj = new protoroot.ObjectDestroyedPayload({
+                    DestroyReason: "Eaten!"
+                });
 
-        //} catch (err) {
-       //    console.log(err);
-       // }
+                var destroyedGameEvent = new protoroot.GameEvent({
+                    Tick: currentTick,
+                    InitObjId: main.id,
+                    TargetObjId: peopleEaten[m],
+                    ObjectDestroyed: eatenObj
+                });
+
+                var message = new protoroot.Message({
+                    GameEvent: destroyedGameEvent
+                });
+
+                var new_msg = message.encode();
+                send(new_msg);
+            }
+
+        } catch (err) {
+           console.log(err);
+        }
 
     };
 })();
