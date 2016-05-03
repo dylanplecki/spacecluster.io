@@ -107,7 +107,7 @@ function draw() {
 
     drawBackground();
     drawgrid();
-    foods.forEach(drawFood);
+    //foods.forEach(drawFood);
 
     // ITERATOR FOR TREE
     //var it = tree.iterator(), item;
@@ -152,10 +152,14 @@ function drawPlayer(player) {
         && player.y + player.size > main.y - screenHeight/2
         && player.y - player.size < main.y + screenHeight/2)
     {
-        var y = absoluteToRelativeY(player.y + Math.sin(player.azimuth) * player.velocity * (currentTick - player.lastTick)); // Trnslate so main is in middle
-        var x = absoluteToRelativeX(player.x + Math.cos(player.azimuth) * player.velocity * (currentTick - player.lastTick)); // Translate so main is in middle
+        var y = absoluteToRelativeY(player.y); // + Math.sin(player.azimuth) * player.velocity * (currentTick - player.lastTick)); // Trnslate so main is in middle
+        var x = absoluteToRelativeX(player.x); //+ Math.cos(player.azimuth) * player.velocity * (currentTick - player.lastTick)); // Translate so main is in middle
         
+        console.log(player.theme);
+	    console.log(x);
+	    console.log(x);
         drawCircle(x, y, player.size, 100);
+
         ctx.fillStyle = "#000000";
         ctx.fillText(player.x + " " + player.y, x, y);
     }
@@ -164,10 +168,13 @@ function drawPlayer(player) {
 function drawMain(player)
 {
     ctx.fillStyle = player.theme;
+
     if ( !(main.x < 0 && target.x < 0))
         main.x += Math.round(target.x * scalar);
+
     if (main.x < 0)
         main.x = 0;
+
     if ( !(main.y < 0 && target.y < 0))
         main.y += Math.round(target.y * scalar);
     if (main.y < 0)

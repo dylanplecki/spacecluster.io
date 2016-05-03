@@ -5,7 +5,7 @@
     "world_seed": "1234",
     "food_regen_ticks": 2000,
     "food_entropy_bytes": 2,
-    "food_size": 15,
+    "food_size": 10,
     "frame_lookback_length": 30,
     "player_kick_timeout": 3,
     "initial_player_size": 50,
