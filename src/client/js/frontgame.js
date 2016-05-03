@@ -119,12 +119,29 @@ function draw() {
     //console.log("drawing");
     for(id in game_objects) {
         if (!game_objects.hasOwnProperty(id)) continue;
-        drawPlayer(game_objects[id]);
+        if (checkIfEaten(game_objects[id]) ) continue;
+       	drawPlayer(game_objects[id]);
     }
 
     drawMain(main);
 }
 
+function checkIfEaten(player)
+{
+	var x = absoulteToRelativeX(player.x);
+	var y = absoluteToRelativeY(player.y);
+
+	distance = Math.sqrt( Math.pow(x-screenWidth/2, 2) + Math.pow(y - screenHeight/2, 2));
+
+	if (distance < main.size && main.size > player.size)
+	{
+		peopleEaten.push(player.id);
+		return 1;
+	}
+
+	return 0;
+
+}
 function drawPlayer(player) {
     ctx.fillStyle = player.theme;
 
