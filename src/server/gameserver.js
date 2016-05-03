@@ -406,7 +406,7 @@ GameEngine.prototype.processEvents = function() {
 
         switch (event.Payload) {
             case 'ObjectDestroyed':
-                assert(target);
+                //assert(target);
                 target.lastUpdatedHrTime = process.hrtime();
 
                 if (target.type === 'food') {
@@ -421,7 +421,7 @@ GameEngine.prototype.processEvents = function() {
                 break;
 
             case 'ObjectSplit':
-                assert(target);
+                //assert(target);
 
                 for (var child in event.ObjectSplit.CreatedObjects) {
                     if (!event.ObjectSplit.CreatedObjects.hasOwnProperty(child)) continue;

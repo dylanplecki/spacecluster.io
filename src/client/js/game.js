@@ -129,7 +129,10 @@ var stat_tps = 0, stat_fps = 0;
                                 var obj = {
                                     id: event.TargetObjId.toNumber()
                                 };
-
+                                if(main.id == obj.id) {
+                                    socket.close();
+                                    console.log("CLOSED");
+                                }
                                 //update to do animation!
                                 tree.remove(obj);
                                 delete game_objects[obj.id];
@@ -258,11 +261,12 @@ var stat_tps = 0, stat_fps = 0;
                     break;
             }
             for(var m = 0; m < peopleEaten.length; m++) {
-
+                console.log("entering this loop");
                 var eatenObj = new protoroot.ObjectDestroyedPayload({
                     DestroyReason: "Eaten!"
                 });
-
+                console.log(peopleEaten.length);
+                console.log(peopleEaten);
                 var destroyedGameEvent = new protoroot.GameEvent({
                     Tick: currentTick,
                     InitObjId: main.id,
@@ -275,7 +279,9 @@ var stat_tps = 0, stat_fps = 0;
                 });
 
                 var new_msg = message.encode();
+                console.log("Sending Eaten dude");
                 send(new_msg);
+                peopleEaten.splice(m, 1);
             }
 
         } catch (err) {

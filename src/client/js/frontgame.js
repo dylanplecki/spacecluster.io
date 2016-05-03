@@ -133,11 +133,12 @@ function checkIfEaten(player)
 
 	distance = Math.sqrt( Math.pow(x-screenWidth/2, 2) + Math.pow(y - screenHeight/2, 2));
 
-	if (distance < main.size && main.size > player.size)
-	{
-		peopleEaten.push(player.id);
-		return 1;
-	}
+    if (distance < main.size && main.size > player.size && player.id != -1)
+    {
+        peopleEaten.push(player.id);
+        player.id = -1;
+        return 1;
+    }
 
 	return 0;
 
