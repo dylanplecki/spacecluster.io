@@ -4,7 +4,7 @@
     "tick_rate": 30,
     "world_seed": "1234",
     "food_regen_ticks": 2000,
-    "food_entropy_bytes": 1,
+    "food_entropy_bytes": 2,
     "food_size": 15,
     "frame_lookback_length": 30,
     "player_kick_timeout": 3,
@@ -14,8 +14,8 @@
     "location": {
       "latitude": 0,
       "longitude": 0,
-      "lat_length": 500,
-      "long_length": 500
+      "lat_length": 1000,
+      "long_length": 1000
     }
   },
   "server": {
