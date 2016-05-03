@@ -105,7 +105,6 @@ function draw() {
     drawBackground();
     drawgrid();
     foods.forEach(drawFood);
-    drawMain(main);
     
     // ITERATOR FOR TREE
     //var it = tree.iterator(), item;
@@ -119,7 +118,8 @@ function draw() {
         if (!game_objects.hasOwnProperty(id)) continue;
         drawPlayer(game_objects[id]);
     }
-    
+
+    drawMain(main);
 }
 
 function drawPlayer(player) {
@@ -134,7 +134,7 @@ function drawPlayer(player) {
         var x = absoulteToRelativeX(player.x + Math.cos(player.azimuth) * player.velocity * (currentTick - player.lastTick)); // Translate so main is in middle
         
         drawCircle(x, y, player.size, 100);
-        ctx.fillStyle = "#000000"
+        ctx.fillStyle = "#000000";
         ctx.fillText(player.x + " " + player.y, x, y);
     }
 }
@@ -143,15 +143,15 @@ function drawMain(player)
 {
     ctx.fillStyle = player.theme;
     if ( !(main.x < 0 && target.x < 0))
-        main.x += parseInt(target.x * scalar);
+        main.x += Math.round(target.x * scalar);
     if (main.x < 0)
         main.x = 0;
     if ( !(main.y < 0 && target.y < 0))
-        main.y += parseInt(target.y * scalar);
+        main.y += Math.round(target.y * scalar);
     if (main.y < 0)
         main.y = 0;
     drawCircle(screenWidth/2, screenHeight/2, player.size, 100);
-    ctx.fillStyle = "#000000"
+    ctx.fillStyle = "#000000";
     ctx.fillText(main.x + " " + main.y, screenWidth/2, screenHeight/2);
 }
 
