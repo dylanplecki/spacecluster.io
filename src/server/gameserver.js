@@ -3,6 +3,7 @@ var winston = require('winston');
 var ProtoBuf = require('protobufjs');
 var fs = require('fs');
 var path = require('path');
+var crypto = require('crypto');
 
 var exports = module.exports = {};
 
@@ -135,6 +136,10 @@ GameEngine.prototype.initialize = function(wss, config) {
 
     // Get engine config options
     this.params.tickRate = config.get('game_engine.tick_rate');
+    this.params.worldSeed = config.get('game_engine.world_seed');
+    this.params.foodRegenTicks = config.get('game_engine.food_regen_ticks');
+    this.params.foodEntropyBytes = config.get('game_engine.food_entropy_bytes');
+    this.params.foodSize = config.get('game_engine.food_size');
     this.params.serverName = config.get('server.name');
     this.params.serverRegion = config.get('server.region');
     this.params.maxPlayers = config.get('game_engine.max_players');
@@ -207,6 +212,9 @@ GameEngine.prototype.initialize = function(wss, config) {
             reportingStart = process.hrtime();
         }.bind(this), this.params.reportingInterval * 1000);
     }
+
+    // Generate world
+    this.generateFood();
 
     this.initialized = true;
     logger.info('GameEngine {' + this.id + '} Initialized');
@@ -341,7 +349,6 @@ GameEngine.prototype.onServerTick = function() {
 
     // Run pre-tick-processors
     this.processEvents();
-    this.generateFood();
 
     // Generate current state
     for (objId in this.objects) {
@@ -450,7 +457,35 @@ GameEngine.prototype.processEvents = function() {
  * Returns: Nothing
  */
 GameEngine.prototype.generateFood = function() {
-    // TODO
+    var keyBuf = crypto.createHash('md5').update(this.params.worldSeed).digest();
+
+    var foodCount = 0;
+    var iterCount = 0;
+    for (var x = 0; x < this.params.location.latLength; ++x) {
+        for (var y = 0; y < this.params.location.longLength; ++y) {
+            var testBuf = crypto.createHash('md5').update(x.toString() + ":" +  y.toString()).digest();
+
+            var createFood = true;
+            for (var i = 0; i < this.params.foodEntropyBytes; ++i) {
+                if (keyBuf[i] !== testBuf[i]) {
+                    createFood = false;
+                    break;
+                }
+            }
+
+            // Create food object on position
+            if (createFood) {
+                var foodObj = new GameObject(this.generateUid(), "food", x, y, 0, 0,
+                    this.params.foodSize, "#FFFFFF", ""); // TODO: Random colors
+                this.objects[foodObj.id] = foodObj;
+                ++foodCount;
+            }
+            ++iterCount;
+        }
+    }
+
+    logger.log('info', 'Food Count: %d, Iteration Count: %d, Ratio: %s',
+        foodCount, iterCount, (foodCount / iterCount).toFixed(8));
 };
 
 /**
