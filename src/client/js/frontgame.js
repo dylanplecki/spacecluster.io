@@ -44,7 +44,7 @@ function drawCircle(centerX, centerY, radius, sides) {
 function drawFood(food){
     ctx.fillStyle = "#FFFFFF";
     var y = absoluteToRelativeY(food.y); // Trnslate so main is in middle
-    var x = absoulteToRelativeX(food.x);
+    var x = absoluteToRelativeX(food.x);
     
     distance = Math.sqrt( Math.pow(x-screenWidth/2, 2) + Math.pow(y - screenHeight/2, 2));
     if(distance < main.size && food.draw == true)
@@ -82,13 +82,13 @@ function drawgrid() {
      ctx.beginPath();
 
 
-    for (var x = absoulteToRelativeX(0) ; x < screenWidth; x += screenHeight / 18) {
+    for (var x = absoluteToRelativeX(0) ; x < screenWidth; x += screenHeight / 18) {
         ctx.moveTo(x, absoluteToRelativeY(0));
         ctx.lineTo(x, screenHeight);
     }
 
     for (var y = absoluteToRelativeY(0) ; y < screenHeight; y += screenHeight / 18) {
-        ctx.moveTo(absoulteToRelativeX(0), y);
+        ctx.moveTo(absoluteToRelativeX(0), y);
         ctx.lineTo(screenWidth, y);
     }
     ctx.stroke();
@@ -100,12 +100,15 @@ function draw() {
 	c.height = window.innerHeight;
 	screenWidth = window.innerWidth;
 	screenHeight = window.innerHeight;
+
     if (settings.log_statistics) ++stat_fps; // Declared in game.js
+    ctx.clearRect(0, 0, screenWidth, screenHeight);
     requestAnimationFrame(draw);
+
     drawBackground();
     drawgrid();
     foods.forEach(drawFood);
-    
+
     // ITERATOR FOR TREE
     //var it = tree.iterator(), item;
     //while((item = it.next()) !== null)
@@ -131,7 +134,7 @@ function drawPlayer(player) {
         && player.y - player.size < main.y + screenHeight/2)
     {
         var y = absoluteToRelativeY(player.y + Math.sin(player.azimuth) * player.velocity * (currentTick - player.lastTick)); // Trnslate so main is in middle
-        var x = absoulteToRelativeX(player.x + Math.cos(player.azimuth) * player.velocity * (currentTick - player.lastTick)); // Translate so main is in middle
+        var x = absoluteToRelativeX(player.x + Math.cos(player.azimuth) * player.velocity * (currentTick - player.lastTick)); // Translate so main is in middle
         
         drawCircle(x, y, player.size, 100);
         ctx.fillStyle = "#000000";
@@ -163,7 +166,7 @@ function gameInput(mouse) {
 	}
 }
 
-function absoulteToRelativeX(x)
+function absoluteToRelativeX(x)
 {
     return x + screenWidth/2 - main.x;
 }
@@ -190,7 +193,6 @@ function start(){
     //image_x.parentNode.removeChild(image_x);
     draw();
 }
-start();
 
 // Needed to have animation frames work on all browsers: Found on github
 (function() {
@@ -201,7 +203,7 @@ start();
         window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame']
                                    || window[vendors[x]+'CancelRequestAnimationFrame'];
     }
- 
+
     if (!window.requestAnimationFrame)
         window.requestAnimationFrame = function(callback, element) {
             var currTime = new Date().getTime();
@@ -211,10 +213,86 @@ start();
             lastTime = currTime + timeToCall;
             return id;
         };
- 
+
     if (!window.cancelAnimationFrame)
         window.cancelAnimationFrame = function(id) {
             clearTimeout(id);
         };
 }());
 
+//------------//
+// DYLAN CODE //
+//------------//
+
+(function() {
+    var fps = 60;
+
+    setInterval(function() {
+        if (settings.log_statistics) ++stat_fps; // Declared in game.js
+
+        // Clear canvas
+        ctx.clearRect(0, 0, screenWidth, screenHeight);
+
+        // Draw background
+        ctx.save();
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(0, 0, screenWidth, screenHeight);
+        ctx.restore();
+
+        // Draw grid
+        ctx.save();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.globalAlpha = 0.15;
+        ctx.beginPath();
+        
+        for (var x = absoluteToRelativeX(0) ; x < screenWidth; x += screenHeight / 18) {
+            ctx.moveTo(x, absoluteToRelativeY(0));
+            ctx.lineTo(x, screenHeight);
+        }
+
+        for (var y = absoluteToRelativeY(0) ; y < screenHeight; y += screenHeight / 18) {
+            ctx.moveTo(absoluteToRelativeX(0), y);
+            ctx.lineTo(screenWidth, y);
+        }
+        
+        ctx.stroke();
+        ctx.restore();
+
+        // Draw current (main) player
+        ctx.save();
+
+        ctx.beginPath();
+        ctx.arc(screenWidth/2, screenHeight/2, main.size, 0, 2*Math.PI);
+        ctx.fillStyle = main.theme;
+        ctx.fill();
+
+        ctx.fillStyle = "#000000";
+        ctx.fillText(main.x + " " + main.y, screenWidth/2, screenHeight/2);
+
+        ctx.restore();
+
+        // Draw other objects
+        ctx.save();
+        foods.forEach(drawFood);
+
+        for(var id in game_objects) {
+            if (!game_objects.hasOwnProperty(id)) continue;
+            drawPlayer(game_objects[id]);
+        }
+        ctx.restore();
+
+        // Update player position
+        if ( !(main.x < 0 && target.x < 0))
+            main.x += Math.round(target.x * scalar);
+        if (main.x < 0)
+            main.x = 0;
+
+        if ( !(main.y < 0 && target.y < 0))
+            main.y += Math.round(target.y * scalar);
+        if (main.y < 0)
+            main.y = 0;
+
+        // --- End frame
+    }, (1000 / fps))
+}());

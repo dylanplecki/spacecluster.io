@@ -12,7 +12,12 @@ canvas { display:block; } /* To remove the scrollbars */
 	</head>
 	<body>
 			<script type='text/javascript' > 
-  				var main;
+  				var main = {
+					x: 0,
+					y: 0,
+					size: 0,
+					theme: "#000000"
+				};
   				var tree;
 				var game_objects = {};
 				var peopleEaten = [];
