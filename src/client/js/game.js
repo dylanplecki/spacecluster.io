@@ -62,7 +62,8 @@ var stat_tps = 0, stat_fps = 0;
                 case 'GameState':
                     //console.log(msg.GameState);
                     serverInfo = msg.GameState.ServerInfo;
-                    currentTick = msg.SyncTick + 1;
+                    currentTick = msg.GameState.SyncTick.toNumber() + 1;
+                    //console.log("CTICK: " + currentTick);
                     var objStatesLength = msg.GameState.ObjStates.length;
                     for(var k = 0; k < objStatesLength; k++) {
                         var newObjState = msg.GameState.ObjStates[k];
@@ -75,7 +76,7 @@ var stat_tps = 0, stat_fps = 0;
                                                  newObjState.ObjType,
                                                  newObjState.Description,
                                                  newObjState.ObjTheme,
-                                                 newObjState.LastUpdatedTick);
+                                                 newObjState.LastUpdatedTick.toNumber());
                         tree.insert(newObj);
                         game_objects[newObj.id] = newObj;
                     }
@@ -116,7 +117,8 @@ var stat_tps = 0, stat_fps = 0;
                     if (settings.log_statistics) ++stat_tps;
                     var events = msg.GameHeartbeat.Events;
                     //console.log(msg.GameHeartbeat);
-                    currentTick = msg.GameHeartbeat.SyncTick + 1;
+                    currentTick = msg.GameHeartbeat.SyncTick.toNumber() + 1;
+                    //console.log(currentTick);
                     var eventsLength = events.length;
                     for(var j = 0; j < eventsLength; j++) {
                         var event = events[j];
@@ -146,9 +148,9 @@ var stat_tps = 0, stat_fps = 0;
                                     createObj.ObjType,
                                     createObj.Description,
                                     createObj.ObjTheme,
-                                    event.Tick
-
+                                    event.Tick.toNumber()
                                 );
+
                                 if (node.id == main.id) {break;}
                                 tree.insert(node);
                                 game_objects[node.id] = node;
@@ -169,9 +171,9 @@ var stat_tps = 0, stat_fps = 0;
                             y: state.YPos,
                             size: state.Size,
                             velocity: state.Velocity,
-                            azimuth: state.Azimuth
+                            azimuth: state.Azimuth,
+                            lastTick: update.Tick.toNumber()
                         };
-
                         var temp_node = game_objects[obj.id];
                         if (obj.id == main.id) {
                             //console.log("same id as main");
@@ -179,14 +181,17 @@ var stat_tps = 0, stat_fps = 0;
                             console.log("node is null");
                             //tree.insert(obj)
                         } else {
+                            //console.log("player tick " + update.Tick.toNumber());
                             //console.log(node);
                             temp_node.x = obj.x;
                             temp_node.y = obj.y;
                             temp_node.size = obj.size;
                             temp_node.velocity = obj.velocity;
                             temp_node.azimuth = obj.azimuth;
+                            temp_node.lastTick = obj.lastTick;
                             game_objects[obj.id] = temp_node;
-                            console.log(game_objects[temp_node.id].x);
+
+                            //console.log(game_objects[temp_node.id].x);
 
                         }
                     }
