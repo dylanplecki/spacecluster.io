@@ -210,6 +210,7 @@ function start(){
     //image_x.parentNode.removeChild(image_x);
     draw();
 }
+start();
 
 // Needed to have animation frames work on all browsers: Found on github
 (function() {
@@ -241,7 +242,7 @@ function start(){
 // DYLAN CODE //
 //------------//
 
-(function() {
+var to_remove = (function() {
     var fps = 60;
 
     setInterval(function() {
@@ -312,4 +313,4 @@ function start(){
 
         // --- End frame
     }, (1000 / fps))
-}());
+});
