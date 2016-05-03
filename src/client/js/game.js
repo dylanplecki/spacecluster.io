@@ -29,8 +29,8 @@ var stat_tps = 0, stat_fps = 0;
     setInterval(function () {
         if (settings.log_statistics) {
             var time = (Date.now() - stat_last) / 1000;
-            console.log("STAT [%s]: tps=%s, fps=%s", time.toFixed(2),
-                (stat_tps / time).toFixed(2), (stat_fps / time).toFixed(2));
+            //console.log("STAT [%s]: tps=%s, fps=%s", time.toFixed(2),
+             //   (stat_tps / time).toFixed(2), (stat_fps / time).toFixed(2));
             stat_last = Date.now();
             stat_tps = 0; stat_fps = 0;
         }
@@ -156,7 +156,7 @@ var stat_tps = 0, stat_fps = 0;
                         }
                     }
                     var updates = msg.GameHeartbeat.Updates;
-                    console.log(updates);
+                    //console.log(updates);
                     var updateLength = updates.length;
                     //console.log(updates);
                     //console.log(tree);
@@ -174,7 +174,7 @@ var stat_tps = 0, stat_fps = 0;
 
                         var temp_node = game_objects[obj.id];
                         if (obj.id == main.id) {
-                            console.log("same id as main");
+                            //console.log("same id as main");
                         } else if (temp_node == null) {
                             console.log("node is null");
                             //tree.insert(obj)

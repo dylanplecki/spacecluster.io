@@ -96,6 +96,10 @@ function drawgrid() {
 }
 
 function draw() {
+	c.width = window.innerWidth;
+	c.height = window.innerHeight;
+	screenWidth = window.innerWidth;
+	screenHeight = window.innerHeight;
     if (settings.log_statistics) ++stat_fps; // Declared in game.js
     requestAnimationFrame(draw);
     drawBackground();
@@ -110,7 +114,7 @@ function draw() {
     //    drawPlayer(item);
     //}
     var id;
-    console.log("drawing");
+    //console.log("drawing");
     for(id in game_objects) {
         if (!game_objects.hasOwnProperty(id)) continue;
         drawPlayer(game_objects[id]);
@@ -126,8 +130,8 @@ function drawPlayer(player) {
         && player.y + player.size > main.y - screenHeight/2
         && player.y - player.size < main.y + screenHeight/2)
     {
-        var y = absoluteToRelativeY(player.y); // Trnslate so main is in middle
-        var x = absoulteToRelativeX(player.x); // Translate so main is in middle
+        var y = absoluteToRelativeY(player.y + Math.sin(player.azimuth) * player.velocity * (currentTick - player.lastTick)); // Trnslate so main is in middle
+        var x = absoulteToRelativeX(player.x + Math.cos(player.azimuth) * player.velocity * (currentTick - player.lastTick)); // Translate so main is in middle
         
         drawCircle(x, y, player.size, 100);
         ctx.fillStyle = "#000000"
@@ -213,3 +217,4 @@ start();
             clearTimeout(id);
         };
 }());
+
