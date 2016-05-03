@@ -128,7 +128,7 @@ function draw() {
 
 function checkIfEaten(player)
 {
-	var x = absoulteToRelativeX(player.x);
+	var x = absoluteToRelativeX(player.x);
 	var y = absoluteToRelativeY(player.y);
 
 	distance = Math.sqrt( Math.pow(x-screenWidth/2, 2) + Math.pow(y - screenHeight/2, 2));
@@ -137,6 +137,7 @@ function checkIfEaten(player)
     {
         peopleEaten.push(player.id);
         player.id = -1;
+        main.size = Math.round (Math.sqrt( Math.pow(main.size, 2) + Math.pow(player.size, 2)) );
         return 1;
     }
 
