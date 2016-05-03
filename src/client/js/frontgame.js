@@ -137,7 +137,7 @@ function checkIfEaten(player)
     {
         peopleEaten.push(player.id);
         player.id = -1;
-        main.size += player.size /4 * 3;
+        main.size = Math.round (Math.sqrt( Math.pow(main.size, 2) + Math.pow(player.size, 2)) );
         return 1;
     }
 
