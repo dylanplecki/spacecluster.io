@@ -76,7 +76,9 @@ var stat_tps = 0, stat_fps = 0;
                                                  newObjState.ObjType,
                                                  newObjState.Description,
                                                  newObjState.ObjTheme,
-                                                 newObjState.LastUpdatedTick.toNumber());
+                                                 newObjState.LastUpdatedTick.toNumber(),
+                                                 0,
+                                                 0);
                         tree.insert(newObj);
                         game_objects[newObj.id] = newObj;
                     }
@@ -152,7 +154,9 @@ var stat_tps = 0, stat_fps = 0;
                                     createObj.ObjType,
                                     createObj.Description,
                                     createObj.ObjTheme,
-                                    event.Tick.toNumber()
+                                    event.Tick.toNumber(),
+                                    0,
+                                    0
                                 );
 
                                 if (node.id == main.id) {break;}
@@ -187,6 +191,8 @@ var stat_tps = 0, stat_fps = 0;
                         } else {
                             //console.log("player tick " + update.Tick.toNumber());
                             //console.log(node);
+                            temp_node.diffX = obj.x - temp_node.x;
+                            temp_node.diffY = obj.y - temp_node.y;
                             temp_node.x = obj.x;
                             temp_node.y = obj.y;
                             temp_node.size = obj.size;
@@ -238,7 +244,9 @@ var stat_tps = 0, stat_fps = 0;
                         event.CreateObject.ObjType,
                         event.CreateObject.Description,
                         event.CreateObject.ObjTheme,
-                        event.Tick
+                        event.Tick,
+                        0,
+                        0
                     );
                     var ObjState = new protoroot.GameObjState(
                         main.x,
@@ -298,7 +306,7 @@ var stat_tps = 0, stat_fps = 0;
     };
 })();
 
-function GameObj(id, x, y, size, velocity, azimuth, type, name, theme, tick) {
+function GameObj(id, x, y, size, velocity, azimuth, type, name, theme, tick, diffX, diffY) {
     this.id = id;
     this.x = x;
     this.y = y;
@@ -309,6 +317,8 @@ function GameObj(id, x, y, size, velocity, azimuth, type, name, theme, tick) {
     this.description = name;
     this.theme = theme;
     this.lastTick = tick;
+    this.diffX = diffX;
+    this.diffY = diffY;
 
 }
 

@@ -98,7 +98,7 @@ function drawgrid() {
 function draw() {
 	if (dead)
 	{
-		main.size = 0;
+		main.size = 1;
 	}
 
 
@@ -143,7 +143,8 @@ function checkIfEaten(player)
     {
         peopleEaten.push(player.id);
         player.id = -1;
-        main.size = Math.round (Math.sqrt( Math.pow(main.size, 2) + Math.pow(player.size, 2)) );
+        main.size = Math.round (Math.sqrt( Math.pow(main.size, 2) + Math.pow(player.size, 2)) ) == main.size ? main.size+1 :
+            Math.round (Math.sqrt( Math.pow(main.size, 2) + Math.pow(player.size, 2)) );
         return 1;
     }
 
@@ -158,12 +159,16 @@ function drawPlayer(player) {
         && player.y + player.size > main.y - screenHeight/2
         && player.y - player.size < main.y + screenHeight/2)
     {
-        var y = absoluteToRelativeY(player.y); // + Math.sin(player.azimuth) * player.velocity * (currentTick - player.lastTick)); // Trnslate so main is in middle
-        var x = absoluteToRelativeX(player.x); //+ Math.cos(player.azimuth) * player.velocity * (currentTick - player.lastTick)); // Translate so main is in middle
-        
-        console.log(player.theme);
-	    console.log(x);
-	    console.log(x);
+        if(player.type != "food") {
+            var y = absoluteToRelativeY(player.y) + Math.round(player.diffY / 2); // + Math.sin(player.azimuth) * player.velocity * (currentTick - player.lastTick)); // Trnslate so main is in middle
+            var x = absoluteToRelativeX(player.x) + Math.round(player.diffX / 2); //+ Math.cos(player.azimuth) * player.velocity * (currentTick - player.lastTick)); // Translate so main is in middle
+        } else {
+            var y = absoluteToRelativeY(player.y);
+            var x = absoluteToRelativeX(player.x);
+        }
+        //console.log(Math.round(player.diffY/2));
+	    //console.log(x);
+	    //console.log(x);
         drawCircle(x, y, player.size, 100);
 
         ctx.fillStyle = "#000000";
@@ -176,13 +181,13 @@ function drawMain(player)
     ctx.fillStyle = player.theme;
 
     if ( !(main.x < 0 && target.x < 0))
-        main.x += Math.round(target.x * scalar);
+        main.x += Math.round(((target.x * scalar)/(2*main.size/50)));
 
     if (main.x < 0)
         main.x = 0;
 
     if ( !(main.y < 0 && target.y < 0))
-        main.y += Math.round(target.y * scalar);
+        main.y += Math.round(((target.y * scalar)/(2*main.size/50)));
     if (main.y < 0)
         main.y = 0;
     drawCircle(screenWidth/2, screenHeight/2, player.size, 100);
