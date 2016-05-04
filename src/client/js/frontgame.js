@@ -96,6 +96,12 @@ function drawgrid() {
 }
 
 function draw() {
+	if (dead)
+	{
+		main.size = 0;
+	}
+
+
 	c.width = window.innerWidth;
 	c.height = window.innerHeight;
 	screenWidth = window.innerWidth;
