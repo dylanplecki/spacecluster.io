@@ -52,7 +52,7 @@ var stat_tps = 0, stat_fps = 0;
     };
 
     socket.onmessage = function (evt) {
-        try {
+        //try {
 
             var msg = protoroot.Message.decode(evt.data),
                 which = msg.Payload;
@@ -130,6 +130,7 @@ var stat_tps = 0, stat_fps = 0;
                                     id: event.TargetObjId.toNumber()
                                 };
                                 if(main.id == obj.id) {
+                                    dead = 1;
                                     socket.close();
                                     console.log("CLOSED");
                                 }
@@ -281,12 +282,12 @@ var stat_tps = 0, stat_fps = 0;
                 var new_msg = message.encode();
                 console.log("Sending Eaten dude");
                 send(new_msg);
-                peopleEaten.splice(m, 1);
             }
+            peopleEaten.splice(0, peopleEaten.length);
 
-        } catch (err) {
-           console.log(err);
-        }
+        //} catch (err) {
+        //   console.log(err);
+        //}
 
     };
 })();
