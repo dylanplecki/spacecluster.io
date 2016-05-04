@@ -6,6 +6,7 @@
     "food_regen_ticks": 2000,
     "food_entropy_bytes": 2,
     "food_size": 10,
+    "food_count": 1500,
     "frame_lookback_length": 30,
     "player_kick_timeout": 3,
     "initial_player_size": 50,
@@ -14,8 +15,8 @@
     "location": {
       "latitude": 0,
       "longitude": 0,
-      "lat_length": 1000,
-      "long_length": 1000
+      "lat_length": 10000,
+      "long_length": 10000
     }
   },
   "server": {

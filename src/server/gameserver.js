@@ -140,6 +140,7 @@ GameEngine.prototype.initialize = function(wss, config) {
     this.params.foodRegenTicks = config.get('game_engine.food_regen_ticks');
     this.params.foodEntropyBytes = config.get('game_engine.food_entropy_bytes');
     this.params.foodSize = config.get('game_engine.food_size');
+    this.params.foodCount = config.get('game_engine.food_count');
     this.params.serverName = config.get('server.name');
     this.params.serverRegion = config.get('server.region');
     this.params.maxPlayers = config.get('game_engine.max_players');
@@ -457,6 +458,15 @@ GameEngine.prototype.processEvents = function() {
  * Returns: Nothing
  */
 GameEngine.prototype.generateFood = function() {
+    for (var i = 0; i < this.params.foodCount; ++i) {
+        var foodObj = new GameObject(this.generateUid(), "food",
+            Math.floor(this.params.location.latLength * Math.random()),
+            Math.floor(this.params.location.longLength * Math.random()),
+            0, 0, this.params.foodSize, "#FFFFFF", ""); // TODO: Random colors
+        this.objects[foodObj.id] = foodObj;
+    }
+
+    /*
     var keyBuf = crypto.createHash('md5').update(this.params.worldSeed).digest();
 
     var foodCount = 0;
@@ -486,6 +496,7 @@ GameEngine.prototype.generateFood = function() {
 
     logger.log('info', 'Food Count: %d, Iteration Count: %d, Ratio: %s',
         foodCount, iterCount, (foodCount / iterCount).toFixed(8));
+    */
 };
 
 /**
