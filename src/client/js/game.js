@@ -131,7 +131,7 @@ var stat_tps = 0, stat_fps = 0;
                                 };
                                 if(main.id == obj.id) {
                                     dead = 1;
-                                    socket.close();
+                                    //socket.close();
                                     console.log("CLOSED");
                                 }
                                 //update to do animation!
@@ -216,7 +216,9 @@ var stat_tps = 0, stat_fps = 0;
                         GameObjUpdate: ObjUpdate
                     });
                     var new_msg = message.encode();
-                    send(new_msg);
+                    if(!dead) {
+                        send(new_msg);
+                    }
                     //console.log(obj);
                     break;
 
@@ -255,7 +257,9 @@ var stat_tps = 0, stat_fps = 0;
                         GameObjUpdate: ObjUpdate
                     });
                     var new_msg = message.encode();
-                    send(new_msg);
+                    if(!dead) {
+                        send(new_msg);
+                    }
                     break;
 
                 default:
@@ -281,7 +285,9 @@ var stat_tps = 0, stat_fps = 0;
 
                 var new_msg = message.encode();
                 console.log("Sending Eaten dude");
-                send(new_msg);
+                if(!dead) {
+                    send(new_msg);
+                }
             }
             peopleEaten.splice(0, peopleEaten.length);
 
